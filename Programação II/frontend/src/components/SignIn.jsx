@@ -12,6 +12,8 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useState, useEffect } from 'react';
+import Home from './Home.jsx'
 
 const defaultTheme = createTheme();
 
@@ -25,69 +27,104 @@ export default function SignIn() {
     });
   };
 
-  return (
-    <ThemeProvider theme={defaultTheme}>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <Box
-          sx={{
-            marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Entrar
-          </Typography>
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="CPF"
-              label="CPF"
-              name="CPF"
-              autoComplete="CPF"
-              autoFocus
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="senha"
-              label="Senha"
-              type="senha"
-              id="senha"
-              autoComplete="current-senha"
-            />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Lembrar Usuário"
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+  const [pagina, setPagina] = useState('login');
+
+  useEffect(
+    ()=>{
+      const url=window.location.href
+      const res=url.split('?')
+      setPagina(res[1])
+    }
+  )
+
+  const LinksPaginas = (p) => {
+    if (p == 'home') {
+      window.open('http://localhost:3000?home','_self');
+    }
+  }
+
+  const retornarPaginas = () =>{
+    if(pagina == 'home'){
+      return <Home />
+    }
+    else {
+      return (
+        <ThemeProvider theme={defaultTheme}>
+          <Container component="main" maxWidth="xs">
+            <CssBaseline />
+            <Box
+              sx={{
+                marginTop: 8,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}
             >
-              Entrar
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2">
-                  Esqueceu a senha?
-                </Link>
-              </Grid>
-              <Grid item>
-              </Grid>
-            </Grid>
-          </Box>
-        </Box>
-      </Container>
-    </ThemeProvider>
-  );
+              <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+                <LockOutlinedIcon />
+              </Avatar>
+              <Typography component="h1" variant="h5">
+                Entrar
+              </Typography>
+              <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="CPF"
+                  label="CPF"
+                  name="CPF"
+                  autoComplete="CPF"
+                  autoFocus
+                />
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  name="senha"
+                  label="Senha"
+                  type="senha"
+                  id="senha"
+                  autoComplete="current-senha"
+                />
+                <FormControlLabel
+                  control={<Checkbox value="remember" color="primary" />}
+                  label="Lembrar UsuÃ¡rio"
+                />
+    
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2 }}
+                  onClick={()=>{
+                    LinksPaginas('home')
+                  }}
+                >
+                  Entrar
+                </Button>
+    
+                <Grid container>
+                  <Grid item xs>
+                    <Link href="#" variant="body2">
+                      Esqueceu a senha?
+                    </Link>
+                  </Grid>
+                  <Grid item>
+                  </Grid>
+                </Grid>
+              </Box>
+            </Box>
+          </Container>
+        </ThemeProvider>
+      );
+    }
+  }
+
+  return (
+    <>
+    {retornarPaginas()}
+    </>
+  )
+  
 }
