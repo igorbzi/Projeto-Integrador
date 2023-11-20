@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useState, useEffect } from 'react';
-import Home from './Home.jsx'
+import Home from './dashboard/Home.jsx'
 
 const defaultTheme = createTheme();
 
