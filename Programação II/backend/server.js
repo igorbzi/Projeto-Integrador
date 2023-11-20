@@ -14,7 +14,7 @@ app.listen(3010, () => console.log("Servidor rodando na porta 3010."));
 
 //------------------------------------fornecedores------------------------------------//:
 
-app.get("/fornecedores", async (req,res)=> {
+app.get("/fornecedor", async (req,res)=> {
     try {
         const fornecedor = await db.any(
             "select * from fornecedor"
@@ -50,6 +50,27 @@ app.post("/fornecedor", async (req, res) => {
     }
 });
 
+app.put("/fornecedor", (req, res) => {
+    try{
+        const id = req.body.cnpj
+        const fornecedorNome = req.body.nome;
+        const fornecedorEmail = req.body.email;                 //pegando parametros da requisição para inserir no banco
+        const fornecedorTelefone1 = req.body.telefone1;
+        const fornecedorTelefone2 = req.body.telefone2;
+        const fornecedorEndereco = req.body.endereco;
+
+        db.none(
+            "UPDATE fornecedor SET nome = $1, email = $2, telefone1 = $3, telefone2 = $4, endereco = $5 WHERE cnpj = $6",
+            [fornecedorNome, fornecedorEmail, fornecedorTelefone1, fornecedorTelefone2, fornecedorEndereco, id]
+        );
+        res.sendStatus(200);
+
+    } catch {
+        console.log(error);
+        res.sendStatus(400);
+    }
+    });
+
 app.delete("/fornecedor", async (req, res) => {
     try{
         const id = req.body.cnpj; //pega parametro da req
@@ -66,7 +87,7 @@ app.delete("/fornecedor", async (req, res) => {
 
 //------------------------------------clientes------------------------------------//:
 
-app.get("/clientes", async (req,res)=> {
+app.get("/cliente", async (req,res)=> {
     try {
         const clientes = await db.any(
             "select * from cliente"
@@ -114,7 +135,7 @@ app.delete("/cliente", async (req, res) => {
 
 //------------------------------------funcionarios------------------------------------//:
 
-app.get("/funcionarios", async (req,res)=> {
+app.get("/funcionario", async (req,res)=> {
     try {
         const funcionarios = await db.any(
             "select cpf, nome, email from funcionario"
@@ -161,7 +182,7 @@ app.delete("/funcionario", async (req, res) => {
 
 //--------------------------------------tintas--------------------------------------//:
 
-app.get("/tintas", async (req,res)=> {
+app.get("/tinta", async (req,res)=> {
     try {
         const tintas = await db.any(
             "select * from tinta"
