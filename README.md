@@ -6,8 +6,8 @@
 <p>-Hallyson Tavares Cruz</p>
 <p>-Igor Lautert Bazei</p>
 
-## Descrição ##
+## Descriï¿½ï¿½o ##
 
-<p>Esse projeto está em desenvolvimento nas disciplinas de Programação II, Banco de Dados I e Engenharia de Software I.</p>
-<p>Até o momento foram desenvolvidos e documentados os requisitos funcionais e não funcionais, o diagrama de casos de uso e alguns protótipos do sistema, esses se encontram na pasta Engenharia de Software I.</p>
-<p>Além disso, o modelo conceitual do banco de dados também foi elaborado. Tanto o arquivo fonte, como a imagem do modelo estão na pasta Banco de Dados.</p>
+<p>Esse projeto estÃ¡ em desenvolvimento nas disciplinas de ProgramaÃ§Ã£o II, Banco de Dados I e Engenharia de Software I.</p>
+<p>AtÃ© o momento foram desenvolvidos e documentados os requisitos funcionais e nÃ£o funcionais, o diagrama de casos de uso e alguns protÃ³tipos do sistema, esses se encontram na pasta Engenharia de Software I.</p>
+<p>AlÃ©m disso, o modelo conceitual e o modelo lÃ³gico do banco de dados tambÃ©m foi elaborado. Tanto o arquivo fonte, como a imagem do modelo estÃ£o na pasta Banco de Dados.</p>
