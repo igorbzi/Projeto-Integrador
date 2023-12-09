@@ -1,20 +1,170 @@
 const express = require("express");
 const cors = require("cors");
 
+const session = require("express-session");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const JwtStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
+
 const pgp = require("pg-promise")({});
 const usuario = "postgres";
 const senha = "igorbd12";
-const db = pgp(`postgres://${usuario}:${senha}@localhost:5432/integrador`);
+const db = pgp(`postgres://${usuario}:${senha}@localhost:5432/sistema`);
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use(
+	session({
+		secret: 'time_limit_exceeded',
+		resave: false,
+		saveUninitialized: false,
+		cookie: { secure: true },
+	}),
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(
+	new LocalStrategy(
+		{
+			usernameField: "username",
+			passwordField: "password",
+		},
+		async (username, password, done) => {
+			try {
+				// busca o usuário no banco de dados
+				const user = await db.oneOrNone(
+					"SELECT * FROM funcionario WHERE CPFF = $1;",
+					[username],
+				);
+
+				// se não encontrou, retorna erro
+				if (!user) {
+					return done(null, false, { message: "Usuário incorreto." });
+				}
+
+				// verifica se o hash da senha bate com a senha informada
+				const passwordMatch = await bcrypt.compare(
+					password,
+					user.senha
+				);
+
+				// se senha está ok, retorna o objeto usuário
+				if (passwordMatch) {
+					console.log("Usuário autenticado!");
+					return done(null, user);
+				} else {
+					// senão, retorna um erro
+					return done(null, false, { message: "Senha incorreta." });
+				}
+			} catch (error) {
+				return done(error);
+			}
+		},
+	),
+);
+
+passport.use(
+	new JwtStrategy(
+		{
+			jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+			secretOrKey: "time_limit_exceeded",
+		},
+		async (payload, done) => {
+			try {
+				const user = await db.oneOrNone(
+					"SELECT * FROM funcionario WHERE CPFF = $1;",
+					[payload.username],
+				);
+
+				if (user) {
+					done(null, user);
+				} else {
+					done(null, false);
+				}
+			} catch (error) {
+				done(error, false);
+			}
+		},
+	),
+);
+
+passport.serializeUser(function (user, cb) {
+	process.nextTick(function () {
+		return cb(null, {
+			CPFF: user.cpff,
+			nome: user.nome,
+		});
+	});
+});
+
+passport.deserializeUser(function (user, cb) {
+	process.nextTick(function () {
+		return cb(null, user);
+	});
+});
+
+const requireJWTAuth = passport.authenticate("jwt", { session: false });
+
+app.post(
+	"/login",
+	passport.authenticate("local", { session: false }),
+	(req, res) => {
+
+		// Cria o token JWT
+		const token = jwt.sign({ username: req.body.username }, "time_limit_exceeded", {
+			expiresIn: "1h",
+		});
+
+		res.json({ message: "Login successful", token: token });
+	},
+);
+
+app.post("/logout", function (req, res, next) {
+	req.logout(function (err) {
+		if (err) {
+			return next(err);
+		}
+		res.redirect("/");
+	});
+});
+
+app.post("/novoUsuario", async (req, res) => {
+	const saltRounds = 10;
+	try {
+		const userCPF = req.body.CPFF;
+		const username = req.body.nome;
+		const userEmail = req.body.email;
+		const userPasswd = req.body.passwd;
+		const userType = req.body.type;
+		const salt = bcrypt.genSaltSync(saltRounds);
+		const hashedPasswd = bcrypt.hashSync(userPasswd, salt);
+
+		console.log(`Nome: ${username} - Email: ${userEmail}`);
+		db.none("INSERT INTO funcionario (CPFF, nome, email, senha, tipousu) VALUES ($1, $2, $3, $4, $5);", [
+			userCPF,
+			username,
+			userEmail,
+			hashedPasswd,
+			userType
+		]);
+		res.sendStatus(200);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(400);
+	}
+});
+
 app.listen(3010, () => console.log("Servidor rodando na porta 3010."));
 
 //------------------------------------fornecedores------------------------------------//:
 
-app.get("/fornecedor", async (req,res)=> {
+app.get("/fornecedor", requireJWTAuth, async (req,res)=> {
     try {
         const fornecedor = await db.any(
             "select * from fornecedor"
@@ -87,7 +237,7 @@ app.delete("/fornecedor", async (req, res) => {
 
 //------------------------------------clientes------------------------------------//:
 
-app.get("/cliente", async (req,res)=> {
+app.get("/cliente", requireJWTAuth, async (req,res)=> {
     try {
         const clientes = await db.any(
             "select * from cliente"
@@ -135,10 +285,10 @@ app.delete("/cliente", async (req, res) => {
 
 //------------------------------------funcionarios------------------------------------//:
 
-app.get("/funcionario", async (req,res)=> {
+app.get("/funcionario", requireJWTAuth, async (req,res)=> {
     try {
         const funcionarios = await db.any(
-            "select cpf, nome, email from funcionario"
+            "select cpff, nome, email from funcionario;"
         );
         res.json(funcionarios).status(200);
     } catch (error) {
@@ -182,7 +332,7 @@ app.delete("/funcionario", async (req, res) => {
 
 //--------------------------------------tintas--------------------------------------//:
 
-app.get("/tinta", async (req,res)=> {
+app.get("/tinta", requireJWTAuth, async (req,res)=> {
     try {
         const tintas = await db.any(
             "select * from tinta"

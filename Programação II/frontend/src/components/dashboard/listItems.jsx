@@ -9,8 +9,9 @@ import PeopleIcon from '@mui/icons-material/People';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import LayersIcon from '@mui/icons-material/Layers';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
-export const mainListItems = (
+export const funcionario = (
   <React.Fragment>
     <ListItemButton>
       <ListItemIcon>
@@ -18,6 +19,11 @@ export const mainListItems = (
       </ListItemIcon>
       <ListItemText primary="Funcionários" />
     </ListItemButton>
+  </React.Fragment>
+);
+
+export const mainListItems = (
+  <React.Fragment>
     <ListItemButton>
       <ListItemIcon>
         <ShoppingCartIcon />
@@ -76,3 +82,14 @@ export const secondaryListItems = (
     </ListItemButton>
   </React.Fragment>
 );
+
+export const logout = (
+  <React.Fragment>
+    <ListItemButton>
+      <ListItemIcon>
+        <ExitToAppIcon />
+      </ListItemIcon>
+      <ListItemText primary="Log Out"/>
+    </ListItemButton>
+  </React.Fragment>
+)
