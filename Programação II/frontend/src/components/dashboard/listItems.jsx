@@ -13,14 +13,30 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 export const funcionario = (
   <React.Fragment>
+    <ListSubheader component="div" inset>
+        Funcionários
+    </ListSubheader>
     <ListItemButton>
       <ListItemIcon>
-        <DashboardIcon />
+        <PeopleIcon />
       </ListItemIcon>
       <ListItemText primary="Funcionários" />
     </ListItemButton>
   </React.Fragment>
 );
+
+export const inicio = (
+  <React.Fragment>
+    <ListItemButton>
+      <ListItemIcon>
+        <DashboardIcon />
+      </ListItemIcon>
+      <ListItemText primary="Página Inicial" />
+    </ListItemButton>
+  </React.Fragment>
+);
+
+
 
 export const mainListItems = (
   <React.Fragment>

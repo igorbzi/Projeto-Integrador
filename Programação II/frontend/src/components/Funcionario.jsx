@@ -3,29 +3,32 @@ import axios from "axios";
 import { DataGrid } from "@mui/x-data-grid";
 import { blue } from "@mui/material/colors";
 import Titulo from "./Titulo"
+import Navbar from "./Navbar";
 //import { IMaskInput } from "react-imask";
 
 import { 
 		Alert, 
 		Button, 
+		Box,
 		Grid, 
+		Container,
 		Snackbar, 
 		Stack, 
-		TextField, 
+		OutlinedInput, 
 		createTheme, 
 		CssBaseline, 
 		ThemeProvider, 
 		Paper, 
-		FormControl, 
-		InputLabel, 
+		FormControl,
 		Select, 
-		MenuItem, 
+		MenuItem,
+		Toolbar, 
 		} from "@mui/material";
 
 
 const colunas = [
 	{ field: "cpff", headerName: "CPF", width: 100 },
-	{ field: "nome", headerName: "Nome", width: 180 },
+	{ field: "nome", headerName: "Nome", width: 280 },
 	{ field: "email", headerName: "Email", width: 180 },
 ];
 
@@ -37,13 +40,14 @@ const defaultTheme = createTheme({
 	}
 });
 
-function Funcionario() {
+function Funcionario(props) {
 
 	const [CPFF, setCPFF] = React.useState("");
 	const [nome, setNome] = React.useState("");
 	const [email, setEmail] = React.useState("");
 	const [senha, setSenha] = React.useState("");
 	const [tipo, setTipo] = React.useState("");
+	const [confirmacao, setConfirmacao] = React.useState("")
 	const [openMessage, setOpenMessage] = React.useState(false);
 	const [messageText, setMessageText] = React.useState("");
 	const [messageSeverity, setMessageSeverity] = React.useState("success");
@@ -52,6 +56,7 @@ function Funcionario() {
 	React.useEffect(() => {
 		getData();
 	}, []);
+
 
 	async function getData() {
 		try {
@@ -74,10 +79,11 @@ function Funcionario() {
 		setCPFF("");
 		setSenha("");
 		setTipo("");
+		setConfirmacao("")
 	}
 
 	function handleCancelClick() {
-		if (nome !== "" || email !== "") {
+		if (CPFF !== "" || nome !== "" || email !== "" || senha !== "" || confirmacao !== "" || tipo !== "") {
 			setMessageText("Cadastro de funcionário cancelado!");
 			setMessageSeverity("warning");
 			setOpenMessage(true);
@@ -87,25 +93,32 @@ function Funcionario() {
 
 	async function handleSubmit() {
 		console.log(`CPF: ${CPFF} - Nome: ${nome} - Email: ${email} - Tipo: ${tipo}`);
-		if (CPFF !== "" && nome !== "" && email !== "" && senha !== "" && tipo !== "") {
-			try {
-				await axios.post("/novoUsuario", {
-					CPFF: CPFF,
-					nome: nome,
-					email: email,
-					passwd: senha,
-					type: tipo
-				});
-				setMessageText("Funcionário cadastrado com sucesso!");
-				setMessageSeverity("success");
-				clearForm(); // limpa o formulário apenas se cadastrado com sucesso
-			} catch (error) {
-				console.log(error);
-				setMessageText("Falha no cadastro do funcionário!");
-				setMessageSeverity("error");
-			} finally {
+		if (CPFF !== "" && nome !== "" && email !== "" && senha !== "" && confirmacao !== "" && tipo !== "") {
+			if(senha===confirmacao){
+				try {
+					await axios.post("/novoUsuario", {
+						CPFF: CPFF,
+						nome: nome,
+						email: email,
+						passwd: senha,
+						type: tipo
+					});
+					setMessageText("Funcionário cadastrado com sucesso!");
+					setMessageSeverity("success");
+					clearForm(); // limpa o formulário apenas se cadastrado com sucesso
+				} catch (error) {
+					console.log(error);
+					setMessageText("Falha no cadastro do funcionário!");
+					setMessageSeverity("error");
+				} finally {
+					setOpenMessage(true);
+					await getData();
+				}
+			} else {
+				setMessageText("Confirmação de senha incorreta!");
+				setMessageSeverity("warning");
 				setOpenMessage(true);
-				await getData();
+				setConfirmacao("");
 			}
 		} else {
 			setMessageText("Dados de funcionário inválidos!");
@@ -123,179 +136,213 @@ function Funcionario() {
 
 
 	return (
+
 		<ThemeProvider theme={defaultTheme}>
 			<CssBaseline />		
-				<Stack 
-					fullWidth
-					spacing={2}
-					style={{
-						height: '500px'
-					}}
-					sx={{
-						p:2,
-						m:2,
-					}}>
-						
-					<Paper 
-						spacing={2} 
+				<Box sx={{ display: 'flex' }}>
+
+					<Navbar onLogout={props.onLogout}/>
+
+					<Box             
+						component="main"
+						mt={2}
 						sx={{
-							m: 4, 
-							maxWidth: '60%'
-							}}>
-							
-
-						<Grid 
-							container 
-							spacing={2} 
-							sx={{m: 2}}>
-						
-							<Grid item xs={11}>
-								<Titulo mensagem={"Cadastro de Funcionários"}/>
-							</Grid>
-
-							<Grid item xs={4}>
-								<TextField
-									fullWidth
-									required
-									type=""
-									id="cpf-input"
-									label="CPF"
-									size="small"
-									onChange={(e) => setCPFF(e.target.value)}
-									value={CPFF}
-									
-								>
-									{/* <IMaskInput 
-									mask="#00.000.000-00" 
-									maskChar=""
-									definitions={{
-										'#': /[1-9]/
-									}}/> */}
-								</TextField>
-							</Grid>
-
-							<Grid item xs={7}>
-								<TextField
-									required
-									fullWidth
-									id="nome-input"
-									label="Nome"
-									size="small"
-									onChange={(e) => setNome(e.target.value)}
-									value={nome}
-								/>
-							</Grid>
-
-							<Grid item xs={11}>
-								<TextField
-									required
-									fullWidth
-									id="email-input"
-									label="E-mail"
-									size="small"
-									onChange={(e) => setEmail(e.target.value)}
-									value={email}
-								/>
-							</Grid>
-
-							<Grid item xs={5}>
-								<FormControl required fullWidth size="small">
-								<InputLabel>Tipo</InputLabel>
-									<Select
-										id="tipo"
-										label="tipo-input"
-										onChange={(e) => setTipo(e.target.value)}
-										value={tipo}
-									>
-									<MenuItem value={1}>Administrador</MenuItem>
-									<MenuItem value={2}>Funcionário</MenuItem>
-									</Select>
-								</FormControl>
-							</Grid>
-
-							<Grid item xs={6}>
-								<TextField
-									sx={{
-										flexDirection: "column"
-									}}
-									fullWidth
-									required
-									id="senha-input"
-									label="Senha"
-									size="small"
-									type="password"
-									onChange={(e) => setSenha(e.target.value)}
-									value={senha}
-								/>
-							</Grid>
-
-							<Grid item xs={11}>
-								<Stack 
-									direction="row" 
-									spacing={3} 
-									justifyContent={'right'}>
-
-									<Button
-										variant="contained"
-										style={{
-											maxWidth: "100px",
-											minWidth: "100px",
-										}}
-										onClick={handleSubmit}
-										type="submit"
-										color="primary"
-									>
-										Enviar
-									</Button>
-									<Button
-										variant="contained"
-										style={{
-											maxWidth: "100px",
-											minWidth: "100px",
-										}}
-										onClick={handleCancelClick}
-										color="error"
-									>
-										Cancelar
-									</Button>
-								</Stack>
-							</Grid>
-						</Grid>
-					</Paper>
-								
-					<Snackbar
-						open={openMessage}
-						autoHideDuration={6000}
-						onClose={handleCloseMessage}
-					>
-						<Alert
-							severity={messageSeverity}
-							onClose={handleCloseMessage}
+							flexGrow: 1,
+							height: '100vh',
+							overflow: 'auto',
+							display: 'flex',
+							flexDirection: 'column'
+						}}
+						spacing={2}
 						>
-							{messageText}
-						</Alert>
-					</Snackbar>
 
-					<Paper sx={{maxWidth: '100%'}}>
-						<Grid container>
-							<Grid item
-								fullWidth
-								xs = {12}
-								style={{ height: "500px" }}
-								sx = {{m: 2}}>
-								{listaFuncionarios.length > 0 && (
-									<DataGrid 
-										rows={listaFuncionarios}
-										columns={colunas}
-										getRowId={(row) => row.cpff}
-									/>
-								)}
+						<Toolbar/>
+							
+						<Grid container spacing={3}>
+							<Grid item xs={12} mx={8} mt={6}>
+								<Paper 
+									sx={{
+										maxWidth: '100%'
+										}}>
+										
+
+									<Grid 
+										container 
+										spacing={2} 
+										sx={{mx: 2}}>
+									
+										<Grid item xs={11} sx={{mt: 2}}>
+											<Titulo mensagem={"Cadastro de Funcionários"} fontSize={"28px"}/>
+										</Grid>
+
+										<Grid item xs={7}>
+										<Titulo mensagem={"Nome"} fontSize={"20px"}/>
+											<OutlinedInput
+												required
+												fullWidth
+												id="nome-input"
+												size="small"
+												onChange={(e) => setNome(e.target.value)}
+												value={nome}
+											/>
+										</Grid>
+
+										<Grid item xs={4} spacing={2}>
+										<Titulo mensagem={"CPF"} fontSize={"20px"}/>
+											<OutlinedInput
+												fullWidth
+												required
+												variant="outlined"
+												id="cpf-input"
+												size="small"
+												onChange={(e) => setCPFF(e.target.value)}
+												value={CPFF}
+											>
+											</OutlinedInput>
+										</Grid>
+
+										<Grid item xs={4}>
+											<Titulo mensagem={"Tipo"} fontSize={"20px"}/>
+											<FormControl required fullWidth size="small">
+												<Select
+													id="tipo"
+													onChange={(e) => setTipo(e.target.value)}
+													value={tipo}
+												>
+												<MenuItem value={1}>Administrador</MenuItem>
+												<MenuItem value={2}>Funcionário</MenuItem>
+												</Select>
+											</FormControl>
+										</Grid>
+
+										<Grid item xs={7}>
+											<Titulo mensagem={"Email"} fontSize={"20px"}/>
+											<OutlinedInput
+												required
+												fullWidth
+												id="email-input"
+												size="small"
+												onChange={(e) => setEmail(e.target.value)}
+												value={email}
+											/>
+										</Grid>
+
+										<Grid item xs={4} sx={{mb:3}}>
+											<Titulo mensagem={"Senha"} fontSize={"20px"}/>
+											<OutlinedInput
+												fullWidth
+												required
+												id="senha-input"
+												size="small"
+												type="password"
+												onChange={(e) => setSenha(e.target.value)}
+												value={senha}
+											/>
+										</Grid>
+
+										<Grid item xs={4} sx={{mb: 3}}>
+											<Titulo mensagem={"Confirmação de Senha"} fontSize={"20px"}/>
+											<OutlinedInput
+												fullWidth
+												required
+												id="confirmar-input"
+												size="small"
+												type="password"
+												onChange={(e) => setConfirmacao(e.target.value)}
+												value={confirmacao}
+											/>
+										</Grid>
+
+										<Grid item xs={3} mt={2.8}>
+											<Stack 
+												direction="row" 
+												spacing={3} 
+												justifyContent={'right'}
+												>
+
+												<Button
+													variant="contained"
+													style={{
+														maxWidth: "100px",
+														minWidth: "100px",
+														maxHeight: "40px"
+													}}
+													onClick={handleSubmit}
+													type="submit"
+													color="primary"
+													height={'28px'}
+													size={"large"}
+												>
+													Enviar
+												</Button>
+												<Button
+													variant="contained"
+													style={{
+														maxWidth: "100px",
+														minWidth: "100px",
+													}}
+													onClick={handleCancelClick}
+													color="error"
+												>
+													Cancelar
+												</Button>
+											</Stack>
+										</Grid>
+									</Grid>
+								</Paper>
+							</Grid>
+
+							<Snackbar
+								open={openMessage}
+								autoHideDuration={6000}
+								onClose={handleCloseMessage}
+							>
+								<Alert
+									severity={messageSeverity}
+									onClose={handleCloseMessage}
+								>
+									{messageText}
+								</Alert>
+							</Snackbar>
+
+							<Grid item xs={12} mx={8} mt={2}>
+								<Paper sx={{maxWidth: '100%', mb: 2}} spacing={2}>
+
+									<Grid container spacing={2} sx={{mx: 2}}>
+									
+									<Grid item xs={11}>
+										<Titulo mensagem={"Funcionários Cadastrados: "} fontSize={"28px"} />
+									</Grid>
+
+									<Grid item 
+										spacing={2}
+										xs = {11}
+										sx = {{ height: '380px'}}
+										>
+										{listaFuncionarios.length > 0 && (
+											<DataGrid 
+												rows={listaFuncionarios}
+												columns={colunas}
+												getRowId={(row) => row.cpff}
+												pageSizeOptions={5}
+												initialState={{
+													pagination:{
+														paginationModel : {
+															pageSize: 5
+														},
+													},
+												}}
+												disableRowSelectionOnClick
+											/>
+										)}
+									</Grid>
+
+									</Grid>
+								</Paper>
 							</Grid>
 						</Grid>
-					</Paper>
-
-
-				</Stack>
+					</Box>
+				</Box>
 		</ThemeProvider>
 	);
 }

@@ -15,7 +15,7 @@ function Titulo(props) {
                 <Typography
                     variant="h3"
                     gutterBottom
-                    style={{ fontSize: "28px" }}
+                    style={{ fontSize: props.fontSize }}
                     sx={{ color: "black" }}
                 >
                     {props.mensagem}

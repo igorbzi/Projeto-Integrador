@@ -45,10 +45,14 @@ function App() {
 				path="/cadastro_funcionarios" 
 				element={
 					isLoggedIn ? 
-						<Funcionario /> : <Login onLogin={handleLogin}/>}/>
+						<Funcionario onLogout={handleLogout}/> : <Login onLogin={handleLogin}/>}/>
 
-			<Route />
-			<Route path="*" element={<Login onLogin={handleLogin}/>} />
+			<Route /> {/*Aqui adiciona as outras rotas*/}
+
+			<Route path="*" 
+			element={					
+					isLoggedIn ? 
+						<Home onLogout={handleLogout}/> : <Login onLogin={handleLogin}/>} />
 		</Routes>
 	);
 }
