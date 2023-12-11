@@ -3,8 +3,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import MuiAppBar from '@mui/material/AppBar';
 import MuiDrawer from '@mui/material/Drawer';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import { logout, funcionario, inicio, cadastroFuncionario, consultaFuncionario, cadastroCliente, cadastroFornecedor, cadastroTinta, cadastroVenda } from './dashboard/listItems';
-
+import { logout, funcionario, inicio } from './dashboard/listItems';
 
 import {
     styled,
@@ -120,77 +119,44 @@ function Navbar(props) {
 
                 <Divider />
 
-
                 <List component="nav">
 
                     <div 
-                        variant="link"
-                        onClick={() => {
-                            navigate("/")
-                        }}
+                        variant="link" onClick={() => {navigate("/")}}
                     >
                         {inicio}
                     </div>
-
                     <Divider />
                     <div
-                        variant="link"
-                        onClick={() => {
-                            navigate("/cadastro_funcionarios")
-                        }}
+                        variant="link" onClick={() => {navigate("/cadastro_funcionarios")}}
                     >
-                        {cadastroFuncionario}
-                    </div>
-                    
-                    <div
-                        variant="link"
-                        onClick={() => {
-                            navigate("/consulta_funcionarios")
-                        }}
-                        >
-                        {consultaFuncionario}
+                        {funcionario}
                     </div>
 
-                    <Divider />
-                    <div   
-                        variant="link"
-                        onClick={() => 
-                            navigate("/cadastro_clientes")}
+                    <div variant="link" onClick={() => navigate("/cadastro_clientes")}
                     >
-                        {cadastroCliente}
+                        Cliente
                     </div>
 
-
-                    <Divider />
-                    <div 
-                        variant="link" 
-                        onClick={() => 
-                            navigate("/cadastro_fornecedores")}
+                    <div variant="link" onClick={() => navigate("/cadastro_fornecedores")}
                     >
-                        {cadastroFornecedor} 
+                        Fornecedor 
                     </div>
 
-                    <Divider />
-                    <div 
-                        variant="link" 
-                        onClick={() => 
-                            navigate("/cadastro_tintas")}
+                    <div variant="link" onClick={() => navigate("/cadastro_tintas")}
                     >
-                        {cadastroTinta}
+                        Tinta
                     </div>
 
-                    <Divider />
-                    <div variant="link" onClick={() => 
-                        navigate("/cadastro_vendas")}
+                    <div variant="link" onClick={() => navigate("/cadastro_vendas")}
                     >
-                        {cadastroVenda}
+                        Venda
                     </div>
 
-                    <Divider />
-
-                    <div onClick={props.onLogout}>{logout}</div>
+                    <div onClick={props.onLogout}>
+                        {logout}
+                    </div>
                 </List>
-
             </Drawer>
         </>
     );

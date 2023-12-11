@@ -2,8 +2,8 @@ import React from "react";
 import axios from "axios";
 import { DataGrid } from "@mui/x-data-grid";
 import { blue } from "@mui/material/colors";
-import Titulo from "./Titulo"
-import Navbar from "./Navbar";
+import Titulo from "../Titulo"
+import Navbar from "../Navbar";
 //import { IMaskInput } from "react-imask";
 
 import { 
@@ -27,9 +27,11 @@ import {
 
 
 const colunas = [
-	{ field: "cpff", headerName: "CPF", width: 100 },
+	{ field: "cod", headerName: "Código", width: 120 },
 	{ field: "nome", headerName: "Nome", width: 280 },
-	{ field: "email", headerName: "Email", width: 180 },
+	{ field: "base", headerName: "Base", width: 80 },
+	{ field: "litragem", headerName: "Litragem", width: 80 },
+	{ field: "fornecedor", headerName: "Fornecedor", width: 200 }
 ];
 
 const defaultTheme = createTheme({
@@ -40,51 +42,48 @@ const defaultTheme = createTheme({
 	}
 });
 
-function Funcionario(props) {
+function Tinta(props) {
 
-	const [CPFF, setCPFF] = React.useState("");
-	const [nome, setNome] = React.useState("");
-	const [email, setEmail] = React.useState("");
-	const [senha, setSenha] = React.useState("");
-	const [tipo, setTipo] = React.useState("");
-	const [confirmacao, setConfirmacao] = React.useState("")
+    const [COD, setCOD] = React.useState("");
+    const [nome, setNome] = React.useState("");
+    const [base, setBase] = React.useState("");
+    const [litragem, setLitragem] = React.useState("");
+	const [CNPJ, setCNPJ] = React.useState("");
 	const [openMessage, setOpenMessage] = React.useState(false);
 	const [messageText, setMessageText] = React.useState("");
 	const [messageSeverity, setMessageSeverity] = React.useState("success");
-	const [listaFuncionarios, setListaFuncionarios] = React.useState([]);
+	const [listaTinta, setListaTinta] = React.useState([]);
 
 	React.useEffect(() => {
 		getData();
 	}, []);
 
-
 	async function getData() {
 		try {
 			const token = localStorage.getItem("token");
-			const res = await axios.get("/funcionario", {
+			const res = await axios.get("/tinta", {
 				headers: {
 					Authorization: `bearer ${token}`,
 				},
 			});
-			setListaFuncionarios(res.data);
+			setListaTinta(res.data);
 			console.log(res.data);
 		} catch (error) {
-			setListaFuncionarios([]);
+			setListaTinta([]);
 		}
 	}
 
 	function clearForm() {
+        setCOD("");
 		setNome("");
-		setEmail("");
-		setCPFF("");
-		setSenha("");
-		setTipo("");
-		setConfirmacao("")
+        setBase("");
+        setLitragem("");
+		setCNPJ("");
 	}
 
 	function handleCancelClick() {
-		if (CPFF !== "" || nome !== "" || email !== "" || senha !== "" || confirmacao !== "" || tipo !== "") {
-			setMessageText("Cadastro de funcionário cancelado!");
+		if (COD !== "" || nome !== "" || base !== "" || litragem !== "" || CNPJ !== "") {
+			setMessageText("Cadastro de tinta cancelado!");
 			setMessageSeverity("warning");
 			setOpenMessage(true);
 		}
@@ -92,36 +91,29 @@ function Funcionario(props) {
 	}
 
 	async function handleSubmit() {
-		console.log(`CPF: ${CPFF} - Nome: ${nome} - Email: ${email} - Tipo: ${tipo}`);
-		if (CPFF !== "" && nome !== "" && email !== "" && senha !== "" && confirmacao !== "" && tipo !== "") {
-			if(senha===confirmacao){
-				try {
-					await axios.post("/novoUsuario", {
-						CPFF: CPFF,
-						nome: nome,
-						email: email,
-						passwd: senha,
-						type: tipo
-					});
-					setMessageText("Funcionário cadastrado com sucesso!");
-					setMessageSeverity("success");
-					clearForm(); // limpa o formulário apenas se cadastrado com sucesso
-				} catch (error) {
-					console.log(error);
-					setMessageText("Falha no cadastro do funcionário!");
-					setMessageSeverity("error");
-				} finally {
-					setOpenMessage(true);
-					await getData();
-				}
-			} else {
-				setMessageText("Confirmação de senha incorreta!");
-				setMessageSeverity("warning");
+		console.log(`COD !== "" ${COD} - Nome: ${nome} - Base: ${base} - Litragem: ${litragem} - CNPJ: ${CNPJ}`);
+		if (COD !== "" && nome !== "" && base !== "" && litragem !== "" && CNPJ !== "") {
+			try {
+				await axios.post("/tinta", {
+                    COD: COD,
+					nome: nome,
+                    base: base,
+                    litragem: litragem,
+                    CNPJ: CNPJ
+				});
+				setMessageText("Tinta cadastrada com sucesso!");
+				setMessageSeverity("success");
+				clearForm(); // limpa o formulário apenas se cadastrado com sucesso
+			} catch (error) {
+				console.log(error);
+				setMessageText("Falha no cadastro da tinta!");
+				setMessageSeverity("error");
+			} finally {
 				setOpenMessage(true);
-				setConfirmacao("");
+				await getData();
 			}
 		} else {
-			setMessageText("Dados de funcionário inválidos!");
+			setMessageText("Dados de tinta inválidos!");
 			setMessageSeverity("warning");
 			setOpenMessage(true);
 		}
@@ -158,7 +150,7 @@ function Funcionario(props) {
 
 						<Toolbar/>
 							
-						<Grid container spacing={3}>
+						<Grid container spacing={2}>
 							<Grid item xs={12} mx={8} mt={6}>
 								<Paper 
 									sx={{
@@ -169,10 +161,25 @@ function Funcionario(props) {
 									<Grid 
 										container 
 										spacing={2} 
-										sx={{mx: 2}}>
+										sx={{mx: 2}}
+										>
 									
 										<Grid item xs={11} sx={{mt: 2}}>
-											<Titulo mensagem={"Cadastro de Funcionários"} fontSize={"28px"}/>
+											<Titulo mensagem={"Cadastro de Tinta"} fontSize={"28px"}/>
+										</Grid>
+
+										<Grid item xs={4} spacing={2}>
+										<Titulo mensagem={"Código"} fontSize={"20px"}/>
+											<OutlinedInput
+												fullWidth
+												required
+												variant="outlined"
+												id="COD-input"
+												size="small"
+												onChange={(e) => setCOD(e.target.value)}
+												value={COD}
+											>
+											</OutlinedInput>
 										</Grid>
 
 										<Grid item xs={7}>
@@ -187,76 +194,65 @@ function Funcionario(props) {
 											/>
 										</Grid>
 
-										<Grid item xs={4} spacing={2}>
-										<Titulo mensagem={"CPF"} fontSize={"20px"}/>
+										<Grid item xs={4} spacing={2} mb={2}>
+										<Titulo mensagem={"Fornecedor"} fontSize={"20px"}/>
 											<OutlinedInput
 												fullWidth
 												required
 												variant="outlined"
-												id="cpf-input"
+												id="cnpj-input"
 												size="small"
-												onChange={(e) => setCPFF(e.target.value)}
-												value={CPFF}
+												onChange={(e) => setCNPJ(e.target.value)}
+												value={CNPJ}
 											>
 											</OutlinedInput>
 										</Grid>
 
-										<Grid item xs={4}>
-											<Titulo mensagem={"Tipo"} fontSize={"20px"}/>
-											<FormControl required fullWidth size="small">
+										<Grid item xs={2} mb={2}>
+											<Titulo mensagem={"Base"} fontSize={"20px"}/>
+											<FormControl 
+												required 
+												fullWidth 
+												size="small">
 												<Select
-													id="tipo"
-													onChange={(e) => setTipo(e.target.value)}
-													value={tipo}
+													id="base-input"
+													onChange={(e) => setBase(e.target.value)}
+													value={base}
 												>
-												<MenuItem value={1}>Administrador</MenuItem>
-												<MenuItem value={2}>Funcionário</MenuItem>
+												<MenuItem value={'A'}>A</MenuItem>
+												<MenuItem value={'B'}>B</MenuItem>
+												<MenuItem value={'C'}>C</MenuItem>
+												<MenuItem value={'P'}>P</MenuItem>
+												<MenuItem value={'MF'}>MF</MenuItem>
+												<MenuItem value={'T'}>T</MenuItem>
 												</Select>
 											</FormControl>
 										</Grid>
 
-										<Grid item xs={7}>
-											<Titulo mensagem={"Email"} fontSize={"20px"}/>
-											<OutlinedInput
-												required
-												fullWidth
-												id="email-input"
-												size="small"
-												onChange={(e) => setEmail(e.target.value)}
-												value={email}
-											/>
+										<Grid item xs={2} mb={2}>
+										<Titulo mensagem={"Litragem"} fontSize={"20px"}/>
+											<FormControl 
+												required 
+												fullWidth 
+												size="small">
+												<Select
+													id="litragem-input"
+													onChange={(e) => setLitragem(e.target.value)}
+													value={litragem}
+												>
+												<MenuItem value={0.9}>900ml</MenuItem>
+												<MenuItem value={3.6}>3.6l</MenuItem>
+												<MenuItem value={18.0}>18l</MenuItem>
+												</Select>
+											</FormControl>
 										</Grid>
 
-										<Grid item xs={4} sx={{mb:3}}>
-											<Titulo mensagem={"Senha"} fontSize={"20px"}/>
-											<OutlinedInput
-												fullWidth
-												required
-												id="senha-input"
-												size="small"
-												type="password"
-												onChange={(e) => setSenha(e.target.value)}
-												value={senha}
-											/>
-										</Grid>
 
-										<Grid item xs={4} sx={{mb: 3}}>
-											<Titulo mensagem={"Confirmação de Senha"} fontSize={"20px"}/>
-											<OutlinedInput
-												fullWidth
-												required
-												id="confirmar-input"
-												size="small"
-												type="password"
-												onChange={(e) => setConfirmacao(e.target.value)}
-												value={confirmacao}
-											/>
-										</Grid>
 
-										<Grid item xs={3} mt={2.8}>
+										<Grid item xs={3} mt={2.8} mb={2}>
 											<Stack 
 												direction="row" 
-												spacing={3} 
+												spacing={2} 
 												justifyContent={'right'}
 												>
 
@@ -305,25 +301,26 @@ function Funcionario(props) {
 								</Alert>
 							</Snackbar>
 
-							<Grid item xs={12} mx={8} mt={2}>
+							<Grid item xs={12} mx={8} my={2} >
 								<Paper sx={{maxWidth: '100%', mb: 2}} spacing={2}>
 
 									<Grid container spacing={2} sx={{mx: 2}}>
 									
 									<Grid item xs={11}>
-										<Titulo mensagem={"Funcionários Cadastrados: "} fontSize={"28px"} />
+										<Titulo mensagem={"Tintas Cadastradas: "} fontSize={"28px"} />
 									</Grid>
 
 									<Grid item 
 										spacing={2}
 										xs = {11}
 										sx = {{ height: '380px'}}
+										mb={3}
 										>
-										{listaFuncionarios.length > 0 && (
+										{listaTinta.length > 0 && (
 											<DataGrid 
-												rows={listaFuncionarios}
+												rows={listaTinta}
 												columns={colunas}
-												getRowId={(row) => row.cpff}
+												getRowId={(row) => row.cod}
 												pageSizeOptions={5}
 												initialState={{
 													pagination:{
@@ -347,4 +344,4 @@ function Funcionario(props) {
 	);
 }
 
-export default Funcionario;
+export default Tinta;

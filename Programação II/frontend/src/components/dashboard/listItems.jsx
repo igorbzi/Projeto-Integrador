@@ -11,7 +11,7 @@ import LayersIcon from '@mui/icons-material/Layers';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
-export const funcionario = (
+export const cadastroFuncionario = (
   <React.Fragment>
     <ListSubheader component="div" inset>
         Funcionários
@@ -20,10 +20,21 @@ export const funcionario = (
       <ListItemIcon>
         <PeopleIcon />
       </ListItemIcon>
-      <ListItemText primary="Funcionários" />
+      <ListItemText primary="Cadastro" />
     </ListItemButton>
   </React.Fragment>
 );
+
+export const consultaFuncionario = (
+  <React.Fragment>
+    <ListItemButton>
+      <ListItemIcon>
+        <PeopleIcon />
+      </ListItemIcon>
+    <ListItemText primary="Consulta" />
+    </ListItemButton>
+  </React.Fragment>
+)
 
 export const inicio = (
   <React.Fragment>
@@ -36,9 +47,18 @@ export const inicio = (
   </React.Fragment>
 );
 
+export const cadastroFornecedor = (
+  <React.Fragment>
+    <ListItemButton>
+      <ListItemIcon>
+        <BarChartIcon />
+      </ListItemIcon>
+      <ListItemText primary="Fornecedores" />
+    </ListItemButton>
+  </React.Fragment>
+);
 
-
-export const mainListItems = (
+export const cadastroTinta = (
   <React.Fragment>
     <ListItemButton>
       <ListItemIcon>
@@ -46,24 +66,32 @@ export const mainListItems = (
       </ListItemIcon>
       <ListItemText primary="Tintas" />
     </ListItemButton>
-    <ListItemButton>
-      <ListItemIcon>
-        <PeopleIcon />
-      </ListItemIcon>
-      <ListItemText primary="Clientes" />
-    </ListItemButton>
-    <ListItemButton>
-      <ListItemIcon>
-        <BarChartIcon />
-      </ListItemIcon>
-      <ListItemText primary="Fornecedores" />
-    </ListItemButton>
+  </React.Fragment>
+);
+
+export const cadastroVenda = (
     <ListItemButton>
       <ListItemIcon>
         <LayersIcon />
       </ListItemIcon>
       <ListItemText primary="Venda" />
     </ListItemButton>
+);
+
+export const cadastroCliente = (
+  <React.Fragment>
+    <ListItemButton>
+      <ListItemIcon>
+        <PeopleIcon />
+      </ListItemIcon>
+      <ListItemText primary="Clientes" />
+    </ListItemButton>
+  </React.Fragment>
+);
+
+
+export const mainListItems = (
+  <React.Fragment>
     <ListItemButton>
       <ListItemIcon>
         <LayersIcon />

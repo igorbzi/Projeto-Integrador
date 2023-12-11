@@ -134,35 +134,11 @@ app.post("/logout", function (req, res, next) {
 	});
 });
 
-app.post("/novoUsuario", async (req, res) => {
-	const saltRounds = 10;
-	try {
-		const userCPF = req.body.CPFF;
-		const username = req.body.nome;
-		const userEmail = req.body.email;
-		const userPasswd = req.body.passwd;
-		const userType = req.body.type;
-		const salt = bcrypt.genSaltSync(saltRounds);
-		const hashedPasswd = bcrypt.hashSync(userPasswd, salt);
-
-		console.log(`Nome: ${username} - Email: ${userEmail}`);
-		db.none("INSERT INTO funcionario (CPFF, nome, email, senha, tipousu) VALUES ($1, $2, $3, $4, $5);", [
-			userCPF,
-			username,
-			userEmail,
-			hashedPasswd,
-			userType
-		]);
-		res.sendStatus(200);
-	} catch (error) {
-		console.log(error);
-		res.sendStatus(400);
-	}
-});
 
 app.listen(3010, () => console.log("Servidor rodando na porta 3010."));
 
 //------------------------------------fornecedores------------------------------------//:
+
 
 app.get("/fornecedor", requireJWTAuth, async (req,res)=> {
     try {
@@ -179,18 +155,18 @@ app.get("/fornecedor", requireJWTAuth, async (req,res)=> {
 app.post("/fornecedor", async (req, res) => {
     try {
 
+        const fornecedorCNPJ = req.body.CNPJ;
         const fornecedorNome = req.body.nome;
-        const fornecedorCNPJ = req.body.cnpj;
-        const fornecedorEmail = req.body.email;                 //pegando parametros da requisição para inserir no banco
+        const fornecedorEmail = req.body.email; 
+        const fornecedorEndereco = req.body.ender;                //pegando parametros da requisição para inserir no banco
         const fornecedorTelefone1 = req.body.telefone1;
         const fornecedorTelefone2 = req.body.telefone2;
-        const fornecedorEndereco = req.body.endereco;
         
         console.log(`CNPJ: ${fornecedorCNPJ} Nome: ${fornecedorNome}`);
 
         db.none(
-            "INSERT INTO fornecedor (nome, cnpj, email, telefone1, telefone2, endereco) VALUES ($1, $2, $3, $4, $5, $6);",   //passando parâmetros
-            [fornecedorNome, fornecedorCNPJ, fornecedorEmail, fornecedorTelefone1, fornecedorTelefone2, fornecedorEndereco]
+            "INSERT INTO fornecedor (cnpj, nome, email, ender, telefone1, telefone2) VALUES ($1, $2, $3, $4, $5, $6);",   //passando parâmetros
+            [fornecedorCNPJ, fornecedorNome, fornecedorEmail, fornecedorEndereco, fornecedorTelefone1, fornecedorTelefone2]
         );
         res.sendStatus(200);
 
@@ -202,15 +178,15 @@ app.post("/fornecedor", async (req, res) => {
 
 app.put("/fornecedor", (req, res) => {
     try{
-        const id = req.body.cnpj
+        const id = req.body.CNPJ
         const fornecedorNome = req.body.nome;
-        const fornecedorEmail = req.body.email;                 //pegando parametros da requisição para inserir no banco
+        const fornecedorEmail = req.body.email;   
+        const fornecedorEndereco = req.body.ender;              //pegando parametros da requisição para inserir no banco
         const fornecedorTelefone1 = req.body.telefone1;
         const fornecedorTelefone2 = req.body.telefone2;
-        const fornecedorEndereco = req.body.endereco;
 
         db.none(
-            "UPDATE fornecedor SET nome = $1, email = $2, telefone1 = $3, telefone2 = $4, endereco = $5 WHERE cnpj = $6",
+            "UPDATE fornecedor SET nome = $1, email = $2, telefone1 = $3, telefone2 = $4, ender = $5 WHERE cnpj = $6",
             [fornecedorNome, fornecedorEmail, fornecedorTelefone1, fornecedorTelefone2, fornecedorEndereco, id]
         );
         res.sendStatus(200);
@@ -251,17 +227,17 @@ app.get("/cliente", requireJWTAuth, async (req,res)=> {
 
 app.post("/cliente", async (req, res) => {
     try {
-        const clienteCPF = req.body.cpf;
+        const clienteCPFC = req.body.CPFC;
         const clienteNome = req.body.nome;
         const clienteEmail = req.body.email;       //pegando parametros da requisição para inserir no banco
+        const clienteEndereco = req.body.ender;
         const clienteTelefone1 = req.body.telefone1;
         const clienteTelefone2 = req.body.telefone2;
-        const clienteEndereco = req.body.endereco;
         
-        console.log(`cpf: ${clienteCPF} Nome: ${clienteNome}`);
+        console.log(`cpf: ${clienteCPFC} Nome: ${clienteNome}`);
         db.none(
-            "INSERT INTO cliente (cpf, nome, endereço, telefone1, telefone2, email) VALUES ($1, $2, $3, $4, $5, $6);", //passando parâmetros
-            [clienteCNPJ, clienteNome, clienteEndereco, clienteTelefone1, clienteTelefone2, clienteEmail]
+            "INSERT INTO cliente (cpfc, nome, email, ender, telefone1, telefone2) VALUES ($1, $2, $3, $4, $5, $6);", //passando parâmetros
+            [clienteCPFC, clienteNome, clienteEmail, clienteEndereco, clienteTelefone1, clienteTelefone2]
         );
         res.sendStatus(200);
     } catch (error) {
@@ -274,7 +250,7 @@ app.delete("/cliente", async (req, res) => {
     try{
         const id = req.body.cpf; //pega parametro da req
         db.none(
-            "DELETE from cliente where cpf = $1;", [id] //deleta pelo cnpj
+            "DELETE from cliente where cpfc = $1;", [id] //deleta pelo cnpj
         );
         res.sendStatus(200);
     } catch (error) {
@@ -297,24 +273,46 @@ app.get("/funcionario", requireJWTAuth, async (req,res)=> {
     }
 });
 
-app.post("/funcionario", async (req, res) => {
-    try {
-        const funcionarioCNPJ = req.body.cnpj;
-        const funcionarioNome = req.body.nome;
-        const funcionarioEmail = req.body.email;       //pegando parametros da requisição para inserir no banco
-        const funcionarioSenha = req.body.senha;
-        const funcionarioTipo = req.body.tipo;
-        
-        console.log(`CNPJ: ${funcionarioCPF} Nome: ${funcionarioNome}`);
-        db.none(
-            "INSERT INTO funcionario (cpf, nome, email, senha, tipo) VALUES ($1, $2, $3, $4, $5);", //passando parâmetros
-            [funcionarioCNPJ, funcionarioNome, funcionarioEmail, funcionarioSenha, funcionarioTipo]
+app.get("/funcionario_id", /*requireJWTAuth*/ async (req, res) => {
+    try{
+        const cpff = req.query.funcionario;
+        console.log(cpff);
+        const funcionario = await db.any(
+            "select cpff, nome, email from funcionario where cpff= $1",
+            [cpff]
         );
-        res.sendStatus(200);
-    } catch (error) {
+        res.json(funcionario).status(200)
+    } catch (error){
         console.log(error);
         res.sendStatus(400);
     }
+}
+);
+
+app.post("/funcionario", async (req, res) => {
+	const saltRounds = 10;
+	try {
+		const userCPF = req.body.CPFF;
+		const username = req.body.nome;
+		const userEmail = req.body.email;
+		const userPasswd = req.body.passwd;
+		const userType = req.body.type;
+		const salt = bcrypt.genSaltSync(saltRounds);
+		const hashedPasswd = bcrypt.hashSync(userPasswd, salt);
+
+		console.log(`Nome: ${username} - Email: ${userEmail}`);
+		db.none("INSERT INTO funcionario (CPFF, nome, email, senha, tipousu) VALUES ($1, $2, $3, $4, $5);", [
+			userCPF,
+			username,
+			userEmail,
+			hashedPasswd,
+			userType
+		]);
+		res.sendStatus(200);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(400);
+	}
 });
 
 app.delete("/funcionario", async (req, res) => {
@@ -332,10 +330,11 @@ app.delete("/funcionario", async (req, res) => {
 
 //--------------------------------------tintas--------------------------------------//:
 
+
 app.get("/tinta", requireJWTAuth, async (req,res)=> {
     try {
         const tintas = await db.any(
-            "select * from tinta"
+            "select t.cod, t.nome, t.base, t.litragem, f.nome as fornecedor from tinta t join fornecedor f on f.cnpj=t.cnpj;"
         );
         res.json(tintas).status(200);
     } catch (error) {
@@ -346,15 +345,16 @@ app.get("/tinta", requireJWTAuth, async (req,res)=> {
 
 app.post("/tinta", async (req, res) => {
     try {
-        const tintaCod = req.body.cod;
+        const tintaCod = req.body.COD;
         const tintaNome = req.body.nome;
-        const tintaLitro = req.body.litro;       //pegando parametros da requisição para inserir no banco
+        const tintaLitragem = req.body.litragem;       //pegando parametros da requisição para inserir no banco
         const tintaBase = req.body.base;
+        const tintaCNPJ = req.body.CNPJ;
         
-        console.log(`CNPJ: ${tintaCod} Nome: ${tintaNome} Litragem: ${tintaLitro} Base: ${tintaBase}`);
+        console.log(`CNPJ: ${tintaCod} Nome: ${tintaNome} Litragem: ${tintaLitragem} Base: ${tintaBase}`);
         db.none(
-            "INSERT INTO tinta (cod, nome, litragem, base) VALUES ($1, $2, $3, $4);", //passando parâmetros
-            [tintaCod, tintaNome, tintaLitro, tintaBase]
+            "INSERT INTO tinta (cod, nome, base, litragem, cnpj) VALUES ($1, $2, $3, $4, $5);", //passando parâmetros
+            [tintaCod, tintaNome, tintaBase, tintaLitragem, tintaCNPJ]
         );
         res.sendStatus(200);
     } catch (error) {
@@ -365,7 +365,7 @@ app.post("/tinta", async (req, res) => {
 
 app.delete("/tinta", async (req, res) => {
     try{
-        const id = req.body.cod; //pega parametro da req
+        const id = req.body.COD; //pega parametro da req
         db.none(
             "DELETE from tinta where cod = $1;", [id] //deleta pelo cnpj
         );
