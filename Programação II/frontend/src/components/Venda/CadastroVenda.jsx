@@ -11,7 +11,6 @@ import {
 		Button, 
 		Box,
 		Grid, 
-		Container,
 		Snackbar, 
 		Stack, 
 		OutlinedInput, 
@@ -19,17 +18,16 @@ import {
 		CssBaseline, 
 		ThemeProvider, 
 		Paper, 
-		FormControl,
-		Select, 
-		MenuItem,
 		Toolbar, 
 		} from "@mui/material";
 
 
 const colunas = [
-	{ field: "cpff", headerName: "CPFF", width: 100 },
-	{ field: "cpfc", headerName: "CPFC", width: 280 },
-	{ field: "data", headerName: "Data", width: 180 },
+	{ field: "cod", headerName: "Código", width: 120 },
+	{ field: "nome", headerName: "Produto", width: 300 },
+	{ field: "base", headerName: "Base", width: 80 },
+	{ field: "litragem", headerName: "Litragem", width: 80 },
+	{ field: "quantidade", headerName: "Quantidade", width: 100 }
 ];
 
 const defaultTheme = createTheme({
@@ -50,10 +48,24 @@ function Venda(props) {
 	const [messageText, setMessageText] = React.useState("");
 	const [messageSeverity, setMessageSeverity] = React.useState("success");
 	const [listaVenda, setListaVenda] = React.useState([]);
+	const [openSelecaoFunc, setOpenSelecaoFunc] = React.useState(false);
 
 	React.useEffect(() => {
 		getData();
 	}, []);
+
+	React.useEffect(() => {
+		const hoje = new Date();
+		const dia = hoje.getDate().toString().padStart(2,'0')
+		const mes = String(hoje.getMonth() + 1).padStart(2,'0')
+		const ano = hoje.getFullYear()
+		const dataAtual = `${dia}/${mes}/${ano}`
+		setData(dataAtual)
+	}, [])
+
+	React.useEffect(() => {
+		getID();
+	}, [])
 
 	async function getData() {
 		try {
@@ -67,6 +79,21 @@ function Venda(props) {
 			console.log(res.data);
 		} catch (error) {
 			setListaVenda([]);
+		}
+	}
+
+	async function getID() {
+		try {
+			const token = localStorage.getItem("token");
+			const res = await axios.get("/id_venda", {
+				headers: {
+					Authorization: `bearer ${token}`,
+				}
+			});
+			setID(parseInt(res.data[0].id) +1);
+			console.log(res.data);
+		} catch (error) {
+			console.log(error);
 		}
 	}
 
@@ -159,7 +186,7 @@ function Venda(props) {
 										sx={{mx: 2}}>
 									
 										<Grid item xs={12} sx={{mt: 2}}>
-											<Titulo mensagem={"Cadastro de Venda"} fontSize={"28px"}/>
+											<Titulo mensagem={"Cadastro de Venda"} fontSize={"30px"}/>
 										</Grid>
 
 										<Grid item xs={1}>
@@ -187,12 +214,15 @@ function Venda(props) {
 												size="small"
 												onChange={(e) => setData(e.target.value)}
 												value={Data}
+												inputProps={{
+													readOnly: true,
+												}}
 											>
 											</OutlinedInput>
 										</Grid>
 
 										<Grid item xs={8} spacing={2}>
-										<Titulo mensagem={"Vendedor:"} fontSize={"20px"}/>
+										<Titulo mensagem={"Vendedor"} fontSize={"20px"}/>
 											<OutlinedInput
 												fullWidth
 												required
@@ -201,12 +231,32 @@ function Venda(props) {
 												size="small"
 												onChange={(e) => setCPFF(e.target.value)}
 												value={CPFF}
+												inputProps={{
+													readOnly: true,
+												}}
 											>
 											</OutlinedInput>
 										</Grid>
 
+										<Grid item xs={3} spacing={2} mt={2.8}>
+											<Button
+												variant="contained"
+												style={{
+													maxWidth: "120px",
+													minWidth: "120px",
+													maxHeight: "40px"
+												}}
+												//onClick={}
+												type="submit"
+												color="primary"
+												height={'28px'}
+												size={"large"}>
+												Selecionar
+											</Button>
+										</Grid>
+
 										<Grid item xs={8}>
-											<Titulo mensagem={"Cliente:"} fontSize={"20px"}/>
+											<Titulo mensagem={"Cliente"} fontSize={"20px"}/>
 											<OutlinedInput
 												required
 												fullWidth
@@ -214,77 +264,133 @@ function Venda(props) {
 												size="small"
 												onChange={(e) => setCPFC(e.target.value)}
 												value={CPFC}
-											/>
-										</Grid>
-
-
-										<Grid item xs={11}>
-										<Titulo mensagem={"Produtos: "} fontSize={"28px"} />
-									</Grid>
-
-									<Grid item 
-										spacing={2}
-										xs = {11}
-										sx = {{ height: '380px'}}
-										>
-										{listaVenda.length > 0 && (
-											<DataGrid 
-												rows={listaVenda}
-												columns={colunas}
-												getRowId={(row) => row.cnpj}
-												pageSizeOptions={5}
-												initialState={{
-													pagination:{
-														paginationModel : {
-															pageSize: 5
-														},
-													},
+												inputProps={{
+													readOnly: true,
 												}}
-												disableRowSelectionOnClick
 											/>
-										)}
-									</Grid>
-
-									<Grid item xs={11} mt={1.8} mb={2}>
-											<Stack 
-												direction="row" 
-												spacing={2} 
-												justifyContent={'right'}
-												>
-
-												<Button
-													variant="contained"
-													style={{
-														maxWidth: "100px",
-														minWidth: "100px",
-														maxHeight: "40px"
-													}}
-													onClick={handleSubmit}
-													type="submit"
-													color="primary"
-													height={'28px'}
-													size={"large"}
-												>
-													Enviar
-												</Button>
-												<Button
-													variant="contained"
-													style={{
-														maxWidth: "100px",
-														minWidth: "100px",
-													}}
-													onClick={handleCancelClick}
-													color="error"
-												>
-													Cancelar
-												</Button>
-											</Stack>
 										</Grid>
+
+										
+										<Grid item xs={3} spacing={2} mt={2.8}>
+											<Button
+												variant="contained"
+												style={{
+													maxWidth: "120px",
+													minWidth: "120px",
+													maxHeight: "40px"
+												}}
+												//onClick={}
+												type="submit"
+												color="primary"
+												height={'28px'}
+												size={"large"}>
+												Selecionar
+											</Button>
+										</Grid>
+
+										<Grid item xs={8}>
+											<Titulo mensagem={"Produtos"} fontSize={"28px"} />
+										</Grid>
+
+										<Grid item 
+											spacing={2}
+											xs = {11}
+											sx = {{ height: '380px'}}
+											>
+											
+												<DataGrid 
+													rows={listaVenda}
+													columns={colunas}
+													getRowId={(row) => row.cnpj}
+													pageSizeOptions={5}
+													initialState={{
+														pagination:{
+															paginationModel : {
+																pageSize: 5
+															},
+														},
+													}}
+													disableRowSelectionOnClick
+												/>
+											
+										</Grid>
+
+										<Grid item xs={2} spacing={2} mt={2}>
+											<Button
+												variant="contained"
+												style={{
+													maxWidth: "200px",
+													minWidth: "200px",
+													maxHeight: "40px"
+												}}
+												onClick={() =>
+												{}}
+												type="submit"
+												color="primary"
+												height={'28px'}
+												size={"large"}>
+												Selecionar Itens
+											</Button>
+										</Grid>
+
+										<Grid item xs={2} spacing={2} mt={2}>
+											<Button
+												variant="contained"
+												style={{
+													maxWidth: "200px",
+													minWidth: "200px",
+													maxHeight: "40px"
+												}}
+												onClick={() =>
+													{}}
+												type="submit"
+												color="primary"
+												height={'28px'}
+												size={"large"}>
+												Excluir Item
+											</Button>
+										</Grid>
+
+										<Grid item xs={7} mt={1.8} mb={2}>
+												<Stack 
+													direction="row" 
+													spacing={2} 
+													justifyContent={'right'}
+													>
+
+													<Button
+														variant="contained"
+														style={{
+															maxWidth: "100px",
+															minWidth: "100px",
+															maxHeight: "40px"
+														}}
+														onClick={handleSubmit}
+														type="submit"
+														color="success"
+														height={'28px'}
+														size={"large"}
+													>
+														Concluir
+													</Button>
+													<Button
+														variant="contained"
+														style={{
+															maxWidth: "100px",
+															minWidth: "100px",
+														}}
+														onClick={handleCancelClick}
+														color="error"
+													>
+														Cancelar
+													</Button>
+												</Stack>
+											</Grid>
 
 									</Grid>
 
 								</Paper>
- 
+
 							</Grid>
 
 							<Snackbar

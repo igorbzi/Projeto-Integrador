@@ -5,11 +5,13 @@ import { DataGrid } from "@mui/x-data-grid";
 import Titulo from "../Titulo"
 
 import {
+    Alert,
     Box,
     Button,
     Grid, 
     OutlinedInput, 
     Paper,
+    Snackbar,
     Toolbar
 } from "@mui/material"
 
@@ -63,8 +65,14 @@ function Consulta(props) {
                     funcionario: parseInt(funcionario)
                 }
             });
-			setListaFuncionarios(res.data);
-			console.log(res.data);
+            if(res.data.length === 0){
+                setMessageText("CPF não está cadastrado!");
+                setMessageSeverity("error");
+                setOpenMessage(true);
+            } else {
+                setListaFuncionarios(res.data);
+                console.log(res.data);
+            }
 		} catch (error) {
 			setListaFuncionarios([]);
 		}
@@ -94,6 +102,13 @@ function Consulta(props) {
                 setOpenMessage(true);
             }
 		}
+	}
+
+    function handleCloseMessage(_, reason) {
+		if (reason === "clickaway") {
+			return;
+		}
+		setOpenMessage(false);
 	}
 
     return (
@@ -178,6 +193,19 @@ function Consulta(props) {
                             </Grid>
                         </Paper>
                     </Grid>
+
+                    <Snackbar
+                        open={openMessage}
+                        autoHideDuration={6000}
+                        onClose={handleCloseMessage}
+                    >
+                        <Alert
+                            severity={messageSeverity}
+                            onClose={handleCloseMessage}
+                        >
+                            {messageText}
+                        </Alert>
+                    </Snackbar>
 
                 </Grid>
             </Box>

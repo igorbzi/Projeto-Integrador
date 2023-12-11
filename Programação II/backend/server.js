@@ -375,3 +375,18 @@ app.delete("/tinta", async (req, res) => {
         res.sendStatus(400)
     }
 });
+
+//--------------------------------------venda--------------------------------------//:
+
+
+app.get("/id_venda", requireJWTAuth, async (req,res)=> {
+    try {
+        const id = await db.any(
+            "select last_value as id from venda_id_seq;"
+        );
+        res.json(id).status(200);
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(400);
+    }
+});
