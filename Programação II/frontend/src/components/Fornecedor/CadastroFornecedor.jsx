@@ -20,9 +20,10 @@ import {
 		Paper, 
 		Toolbar, 
 		} from "@mui/material";
+import Tabela from "../Tabela";
 
 const colunas = [
-	{ field: "cnpj", headerName: "CNPJ", width: 160 },
+	{ field: "id", headerName: "CNPJ", width: 160 },
 	{ field: "nome", headerName: "Nome", width: 280 },
 	{ field: "email", headerName: "Email", width: 250 },
 	{ field: "telefone1", headerName: "Telefone 1", width: 120 },
@@ -305,29 +306,12 @@ function Fornecedor(props) {
 										<Titulo mensagem={"Fornecedores Cadastrados: "} fontSize={"28px"} />
 									</Grid>
 
-									<Grid item 
-										spacing={2}
-										xs = {11}
-										sx = {{ height: '380px'}}
-										mb={3}
-										>
-										{listaFornecedor.length > 0 && (
-											<DataGrid 
-												rows={listaFornecedor}
-												columns={colunas}
-												getRowId={(row) => row.cnpj}
-												pageSizeOptions={5}
-												initialState={{
-													pagination:{
-														paginationModel : {
-															pageSize: 5
-														},
-													},
-												}}
-												disableRowSelectionOnClick
-											/>
-										)}
-									</Grid>
+									<Tabela
+									lista={listaFornecedor} 
+									colunas={colunas}
+									qtd={5}
+									selecao={false}
+									height={'380px'}/>
 
 									</Grid>
 								</Paper>

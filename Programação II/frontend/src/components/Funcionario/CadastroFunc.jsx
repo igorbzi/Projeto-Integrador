@@ -23,13 +23,15 @@ import {
 		MenuItem,
 		Toolbar, 
 		} from "@mui/material";
+import Tabela from "../Tabela";
 
 
 const colunas = [
-	{ field: "cpff", headerName: "CPF", width: 100 },
+	{ field: "id", headerName: "CPF", width: 100 },
 	{ field: "nome", headerName: "Nome", width: 280 },
 	{ field: "email", headerName: "Email", width: 180 },
 ];
+
 
 const defaultTheme = createTheme({
 	palette: {
@@ -313,29 +315,12 @@ function CadastroFuncionario(props) {
 										<Titulo mensagem={"Funcionários Cadastrados: "} fontSize={"28px"} />
 									</Grid>
 
-									<Grid item 
-										spacing={2}
-										xs = {11}
-										sx = {{ height: '380px'}}
-										mb={2}
-										>
-										{listaFuncionarios.length > 0 && (
-											<DataGrid 
-												rows={listaFuncionarios}
-												columns={colunas}
-												getRowId={(row) => row.cpff}
-												pageSizeOptions={5}
-												initialState={{
-													pagination:{
-														paginationModel : {
-															pageSize: 5
-														},
-													},
-												}}
-												disableRowSelectionOnClick
-											/>
-										)}
-									</Grid>
+									<Tabela
+									lista={listaFuncionarios} 
+									colunas={colunas}
+									qtd={5}
+									selecao={false}
+									height={'380px'}/>
 
 									</Grid>
 								</Paper>

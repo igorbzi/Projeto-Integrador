@@ -23,10 +23,11 @@ import {
 		MenuItem,
 		Toolbar, 
 		} from "@mui/material";
+import Tabela from "../Tabela";
 
 
 const colunas = [
-	{ field: "cod", headerName: "Código", width: 120 },
+	{ field: "id", headerName: "Código", width: 120 },
 	{ field: "nome", headerName: "Nome", width: 280 },
 	{ field: "base", headerName: "Base", width: 80 },
 	{ field: "litragem", headerName: "Litragem", width: 80 },
@@ -309,29 +310,12 @@ function Tinta(props) {
 										<Titulo mensagem={"Tintas Cadastradas: "} fontSize={"28px"} />
 									</Grid>
 
-									<Grid item 
-										spacing={2}
-										xs = {11}
-										sx = {{ height: '380px'}}
-										mb={3}
-										>
-										{listaTinta.length > 0 && (
-											<DataGrid 
-												rows={listaTinta}
-												columns={colunas}
-												getRowId={(row) => row.cod}
-												pageSizeOptions={5}
-												initialState={{
-													pagination:{
-														paginationModel : {
-															pageSize: 5
-														},
-													},
-												}}
-												disableRowSelectionOnClick
-											/>
-										)}
-									</Grid>
+									<Tabela
+										lista={listaTinta} 
+										colunas={colunas}
+										qtd={5}
+										selecao={false}
+										height={'380px'}/>
 
 									</Grid>
 								</Paper>

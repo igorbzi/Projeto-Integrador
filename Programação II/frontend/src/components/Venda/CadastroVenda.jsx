@@ -1,6 +1,5 @@
 import React from "react";
 import axios from "axios";
-import { DataGrid } from "@mui/x-data-grid";
 import { blue } from "@mui/material/colors";
 import Titulo from "../Titulo"
 import Navbar from "../Navbar";
@@ -20,10 +19,12 @@ import {
 		Paper, 
 		Toolbar, 
 		} from "@mui/material";
+import SelecaoFunc from "../Selecao/SelecaoFunc";
+import Tabela from "../Tabela";
 
 
 const colunas = [
-	{ field: "cod", headerName: "Código", width: 120 },
+	{ field: "id", headerName: "Código", width: 120 },
 	{ field: "nome", headerName: "Produto", width: 300 },
 	{ field: "base", headerName: "Base", width: 80 },
 	{ field: "litragem", headerName: "Litragem", width: 80 },
@@ -152,11 +153,14 @@ function Venda(props) {
 	return (
 
 		<ThemeProvider theme={defaultTheme}>
-			<CssBaseline />		
+			<CssBaseline />	
+				
+				<SelecaoFunc isOpen={openSelecaoFunc}/>
+
 				<Box sx={{ display: 'flex' }}>
 
 					<Navbar onLogout={props.onLogout}/>
-
+					
 					<Box             
 						component="main"
 						mt={2}
@@ -171,7 +175,8 @@ function Venda(props) {
 						>
 
 						<Toolbar/>
-							
+
+
 						<Grid container spacing={3}>
 							<Grid item xs={12} mx={8} mt={6}>
 								<Paper 
@@ -292,28 +297,12 @@ function Venda(props) {
 											<Titulo mensagem={"Produtos"} fontSize={"28px"} />
 										</Grid>
 
-										<Grid item 
-											spacing={2}
-											xs = {11}
-											sx = {{ height: '380px'}}
-											>
-											
-												<DataGrid 
-													rows={listaVenda}
-													columns={colunas}
-													getRowId={(row) => row.cnpj}
-													pageSizeOptions={5}
-													initialState={{
-														pagination:{
-															paginationModel : {
-																pageSize: 5
-															},
-														},
-													}}
-													disableRowSelectionOnClick
-												/>
-											
-										</Grid>
+										<Tabela
+										lista={listaVenda} 
+										colunas={colunas}
+										qtd={5}
+										selecao={false}
+										height={'380px'}/>
 
 										<Grid item xs={2} spacing={2} mt={2}>
 											<Button
@@ -324,7 +313,7 @@ function Venda(props) {
 													maxHeight: "40px"
 												}}
 												onClick={() =>
-												{}}
+												{setOpenSelecaoFunc(true)}}
 												type="submit"
 												color="primary"
 												height={'28px'}

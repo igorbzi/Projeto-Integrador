@@ -14,9 +14,10 @@ import {
     Snackbar,
     Toolbar
 } from "@mui/material"
+import Tabela from '../Tabela';
 
 const colunas = [
-	{ field: "cpff", headerName: "CPF", width: 100 },
+	{ field: "id", headerName: "CPF", width: 100 },
 	{ field: "nome", headerName: "Nome", width: 280 },
 	{ field: "email", headerName: "Email", width: 180 },
 ];
@@ -139,29 +140,12 @@ function Consulta(props) {
                                     <Titulo mensagem={"Funcionários Cadastrados: "} fontSize={"28px"} />
                                 </Grid>
 
-                                <Grid item 
-                                    spacing={2}
-                                    xs = {11}
-                                    sx={{height: '490px'}}
-                                    >
-                                    {listaFuncionarios.length > 0 && (
-                                        <DataGrid 
-                                            mb={2}
-                                            rows={listaFuncionarios}
-                                            columns={colunas}
-                                            getRowId={(row) => row.cpff}
-                                            pageSizeOptions={7}
-                                            initialState={{
-                                                pagination:{
-                                                    paginationModel : {
-                                                        pageSize: 7
-                                                    },
-                                                },
-                                            }}
-                                            disableRowSelectionOnClick
-                                        />
-                                    )}
-                                </Grid>
+                                <Tabela
+									lista={listaFuncionarios} 
+									colunas={colunas}
+									qtd={7}
+									selecao={false}
+                                    height={'490px'}/>
 
                                 <Grid item xs={8} mb={2}>
                                     <OutlinedInput

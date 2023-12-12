@@ -143,7 +143,7 @@ app.listen(3010, () => console.log("Servidor rodando na porta 3010."));
 app.get("/fornecedor", requireJWTAuth, async (req,res)=> {
     try {
         const fornecedor = await db.any(
-            "select * from fornecedor"
+            "select cnpj as id, nome, email, ender, telefone1, telefone2 from fornecedor"
         );
         res.json(fornecedor).status(200);
     } catch (error) {
@@ -216,7 +216,7 @@ app.delete("/fornecedor", async (req, res) => {
 app.get("/cliente", requireJWTAuth, async (req,res)=> {
     try {
         const clientes = await db.any(
-            "select * from cliente"
+            "select cpfc as id, nome, email, ender, telefone1, telefone2 from cliente"
         );
         res.json(clientes).status(200);
     } catch (error) {
@@ -264,7 +264,7 @@ app.delete("/cliente", async (req, res) => {
 app.get("/funcionario", requireJWTAuth, async (req,res)=> {
     try {
         const funcionarios = await db.any(
-            "select cpff, nome, email from funcionario;"
+            "select cpff as id, nome, email from funcionario;"
         );
         res.json(funcionarios).status(200);
     } catch (error) {
@@ -278,7 +278,7 @@ app.get("/funcionario_id", /*requireJWTAuth*/ async (req, res) => {
         const cpff = req.query.funcionario;
         console.log(cpff);
         const funcionario = await db.any(
-            "select cpff, nome, email from funcionario where cpff= $1",
+            "select cpff as id, nome, email from funcionario where cpff= $1",
             [cpff]
         );
         res.json(funcionario).status(200)
@@ -334,7 +334,7 @@ app.delete("/funcionario", async (req, res) => {
 app.get("/tinta", requireJWTAuth, async (req,res)=> {
     try {
         const tintas = await db.any(
-            "select t.cod, t.nome, t.base, t.litragem, f.nome as fornecedor from tinta t join fornecedor f on f.cnpj=t.cnpj;"
+            "select t.cod as id, t.nome, t.base, t.litragem, f.nome as fornecedor from tinta t join fornecedor f on f.cnpj=t.cnpj;"
         );
         res.json(tintas).status(200);
     } catch (error) {
@@ -385,6 +385,39 @@ app.get("/id_venda", requireJWTAuth, async (req,res)=> {
             "select last_value as id from venda_id_seq;"
         );
         res.json(id).status(200);
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(400);
+    }
+});
+
+app.get("/venda", requireJWTAuth, async (req,res)=> {
+    try {
+        const vendas = await db.any(
+            "select v.id, v.cpff, v.cpfc, v.data from venda v;"
+        );
+        res.json(vendas).status(200);
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(400);
+    }
+});
+
+app.post("/venda", async (req, res) => {
+    try {
+        const vendaID = req.body.ID;
+        const vendaCPFF = req.body.CPFF;
+        const vendaCPFC = req.body.CPFC;
+        const vendaData = req.body.Data;
+
+        console.log(`ID: ${vendaID} CPFF: ${vendaCPFF} CPFC: ${vendaCPFC} Data: ${vendaData}`);
+        
+        await db.none(
+            "INSERT INTO venda (cpff, cpfc, data) VALUES ($1, $2, $3);",
+            [vendaID, vendaCPFF, vendaCPFC, vendaData]
+        );
+
+        res.sendStatus(200);
     } catch (error) {
         console.log(error);
         res.sendStatus(400);

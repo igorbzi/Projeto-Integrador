@@ -20,10 +20,11 @@ import {
 		Paper, 
 		Toolbar, 
 		} from "@mui/material";
+import Tabela from "../Tabela";
 
 
 const colunas = [
-	{ field: "cpfc", headerName: "CPF", width: 125 },
+	{ field: "id", headerName: "CPF", width: 125 },
 	{ field: "nome", headerName: "Nome", width: 245 },
 	{ field: "email", headerName: "Email", width: 250 },
 	{ field: "telefone1", headerName: "Telefone 1", width: 120 },
@@ -307,28 +308,12 @@ function Cliente(props) {
 										<Titulo mensagem={"Clientes Cadastrados: "} fontSize={"28px"} />
 									</Grid>
 
-									<Grid item 
-										spacing={2}
-										xs = {11}
-										sx = {{ height: '380px'}}
-										>
-										{listaClientes.length > 0 && (
-											<DataGrid 
-												rows={listaClientes}
-												columns={colunas}
-												getRowId={(row) => row.cpfc}
-												pageSizeOptions={5}
-												initialState={{
-													pagination:{
-														paginationModel : {
-															pageSize: 5
-														},
-													},
-												}}
-												disableRowSelectionOnClick
-											/>
-										)}
-									</Grid>
+									<Tabela
+									lista={listaClientes} 
+									colunas={colunas}
+									qtd={5}
+									selecao={false}
+									height={'380px'}/>
 
 									</Grid>
 								</Paper>
