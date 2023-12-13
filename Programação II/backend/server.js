@@ -367,7 +367,7 @@ app.get("/funcionario_email", requireJWTAuth, async (req, res) => {
 }
 );
 
-app.post("/funcionario", requireJWTAuth, async (req, res) => {
+app.post("/funcionario", async (req, res) => {
 	const saltRounds = 10;
 	try {
 		const userCPF = req.body.CPFF;

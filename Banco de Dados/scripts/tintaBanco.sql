@@ -36,7 +36,7 @@ CREATE TABLE Venda (
 	constraint fk_venda_cliente foreign key (CPFC) references Cliente(CPFC)
 );
 
-INSERT INTO Venda (CPFF, CPFC, Data) VALUES (12345678, 54321, '12-03-2004');
+INSERT INTO Venda (CPFF, CPFC, Data, status) VALUES (12345678, 54321, '12-03-2004', 'Fechada');
 
 CREATE TABLE Fornecedor (
 	CNPJ BIGINT NOT NULL,
@@ -62,7 +62,7 @@ CREATE TABLE Tinta (
 	constraint fk_tinta_fornecedor foreign key (CNPJ) references Fornecedor(CNPJ)
 );
 
-INSERT INTO Tinta (COD, Nome, Base, Litragem, CNPJ) VALUES (123, 'tinta Com Cor', 'nsei', 4.4, 13579);
+INSERT INTO Tinta (COD, Nome, Base, Litragem, CNPJ) VALUES ('ABC123', 'Azul Marinho', 'A', 3.6, 1357913579);
 
 CREATE TABLE Composicao (
 	ID INTEGER NOT NULL,
@@ -73,4 +73,4 @@ CREATE TABLE Composicao (
 	constraint fk_composicao_tinta foreign key (COD) references Tinta(COD)
 );
 
-INSERT INTO Composicao (ID, COD, Qtd) VALUES (1,123,3);
+INSERT INTO Composicao (ID, COD, Qtd) VALUES (1,'ABC123',3);
