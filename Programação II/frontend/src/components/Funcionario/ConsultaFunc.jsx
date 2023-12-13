@@ -29,7 +29,6 @@ function Consulta(props) {
 	const [messageText, setMessageText] = React.useState("");
 	const [messageSeverity, setMessageSeverity] = React.useState("success");
 
-
     React.useEffect(() => {
 		getData();
 	}, []);
@@ -80,50 +79,62 @@ function Consulta(props) {
 
     async function handleDelete() {
         try {
-        if (!funcionario || isNaN(parseInt(funcionario))) {
-            setMessageText('CPF inválido. Por favor, insira um CPF válido.');
-            setMessageSeverity('warning');
-            setOpenMessage(true);
-            return;
-        }
+            const token = localStorage.getItem('token');
     
-        const token = localStorage.getItem('token');
-        await axios.delete('/funcionario', {
-            headers: {
-            Authorization: `bearer ${token}`,
-            },
-            data: {
-            CPFF: parseInt(funcionario),
-            },
-        });
-    
-        const cpfExists = await axios.get('/funcionario_id', {
-            headers: {
-            Authorization: `bearer ${token}`,
-            },
-            params: {
-            funcionario: parseInt(funcionario),
-            },
-        });
-            
-        if (cpfExists.data.length === 0) {
-            setMessageText('Funcionário deletado com sucesso!');
-            setMessageSeverity('success');
-            setOpenMessage(true);
-            getData();
-            clearForm();
-        } else {
+            console.log(parseInt(funcionario))
+            const cpfExists = await axios.get('/funcionario_id', {
+                headers: {
+                    Authorization: `bearer ${token}`,
+                },
+                funcionario: parseInt(funcionario),
+            });
+                
+            if (!funcionario || isNaN(parseInt(funcionario)) || cpfExists.data.length===0) {
+                setMessageText('CPF inválido. Por favor, insira um CPF válido.');
+                setMessageSeverity('warning');
+                setOpenMessage(true);
+            } else {
+                const vendas = await axios.get("/vendas_funcionario", {
+                    params: {
+                        funcionario: parseInt(funcionario)
+                    },
+                    headers: {
+                        Authorization: `bearer ${token}`,
+                    },
+                })
+
+                if(vendas.data.length>0){
+                    setMessageSeverity('error');
+                    setMessageText("Não é possível excluir funcionários com vendas cadastradas!")
+                    setOpenMessage(true);
+                } else {
+                    await axios.delete('/funcionario', {
+                        data: {
+                            CPFF: parseInt(funcionario),
+                        },
+                        headers: {
+                        Authorization: `bearer ${token}`,
+                        }
+                    });
+                    setMessageSeverity('success');
+                    setMessageText('Funcionário deletado com sucesso!')
+                    setOpenMessage(true);
+                    getData();
+                }
+            }
+        } catch (error) {
+            console.error(error);
             setMessageText('Falha ao deletar funcionário!');
             setMessageSeverity('error');
             setOpenMessage(true);
+            getData();
         }
-        } catch (error) {
-        console.error(error);
-        setMessageText('Falha ao deletar funcionário!');
-        setMessageSeverity('error');
-        setOpenMessage(true);
         }
-    }
+
+        async function handleAlter(){
+
+        }
+
 
     async function handleSubmit() {
 		if (funcionario !== "") {
@@ -134,7 +145,6 @@ function Consulta(props) {
                 console.log(error);
                 setMessageText("Falha na busca do funcionário!");
                 setMessageSeverity("error");
-            } finally {
                 setOpenMessage(true);
             }
 		} else {
@@ -145,11 +155,10 @@ function Consulta(props) {
                 console.log(error);
                 setMessageText("Falha na busca do funcionário!");
                 setMessageSeverity("error");
-            } finally {
                 setOpenMessage(true);
-            }
-		}
-	}
+		    }
+	    }
+    }
 
     function handleCloseMessage(_, reason) {
 		if (reason === "clickaway") {
@@ -160,6 +169,7 @@ function Consulta(props) {
 
     return (
         <Box sx = {{ display: 'flex'}}>
+
             <Navbar onLogout={props.onLogout}/>
 
             <Box 						
@@ -173,7 +183,6 @@ function Consulta(props) {
                 }}
                 spacing={2}>
 
-                <Toolbar />
 
                 <Grid container>
 
@@ -190,20 +199,26 @@ function Consulta(props) {
 									lista={listaFuncionarios} 
 									colunas={colunas}
 									qtd={7}
-									selecao={false}
-                                    height={'490px'}/>
+									selecao={true}
+                                    height={'490px'}
+                                    setLinha={(e) => {
+                                        setFuncionario(e[0]);
+                                        console.log(funcionario)
+                                        }
+                                    }/>
 
-                                <Grid item xs={8} mb={2}>
+                                <Grid item xs={8}>
                                     <OutlinedInput
                                     fullWidth
                                     id="funcionario-input"
                                     size="small"
                                     onChange={(e) => setFuncionario(e.target.value)}
                                     value={funcionario}
+                                    
                                     />
                                 </Grid>
 
-                                <Grid item xs={3} mb={2}>
+                                <Grid item xs={3}>
                                     <Button
                                         fullWidth
                                         justifyContent={'right'}
@@ -229,13 +244,31 @@ function Consulta(props) {
                                             minWidth: "100px",
                                             height: "40px"
                                         }}
-                                        onClick={handleDelete}
+                                        onClick={() => {}}
                                         type="submit"
                                         color="primary"
+                                        size={"large"}>
+                                        Alterar
+                                    </Button>
+                                </Grid>
+
+                                <Grid item xs={3} mb={1}>
+                                    <Button
+                                        fullWidth
+                                        justifyContent={'left'}
+                                        variant="contained"
+                                        style={{
+                                            minWidth: "100px",
+                                            height: "40px"
+                                        }}
+                                        onClick={handleDelete}
+                                        type="submit"
+                                        color="error"
                                         size={"large"}>
                                         Deletar
                                     </Button>
                                 </Grid>
+
 
                             </Grid>
                         </Paper>

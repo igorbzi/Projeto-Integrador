@@ -415,7 +415,7 @@ app.put("/funcionario", requireJWTAuth, async (req, res) => {
 
 app.delete("/funcionario", requireJWTAuth, async (req, res) => {
     try{
-        const id = req.body.cpf; //pega parametro da req
+        const id = req.body.CPFF; //pega parametro da req
         db.none(
             "DELETE from funcionario where cpff = $1;", [id] //deleta pelo cnpj
         );
@@ -515,6 +515,21 @@ app.get("/venda", requireJWTAuth, async (req,res)=> {
     }
 });
 
+app.get("/vendas_funcionario", requireJWTAuth, async (req,res)=> {
+    try {
+        const funcionario = req.query.funcionario;
+        const vendas = await db.any(
+            "select id from venda where cpff=$1;", 
+            [funcionario]
+        );
+        console.log(vendas)
+        res.json(vendas).status(200);
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(400);
+    }
+});
+
 app.post("/venda", requireJWTAuth, async (req, res) => {
     try {
         const vendaID = req.body.ID;
@@ -562,7 +577,7 @@ app.get("/itens_venda", requireJWTAuth, async (req,res) => {
             "select t.cod as id, t.nome, t.base, t.litragem, c.qtd from tinta t join composicao c on t.cod=c.cod natural join venda v where v.id= $1;",
             [id]
         );
-
+        console.log(vendas);
         res.json(vendas).status(200);
     } catch (error) {
         console.log(error);
@@ -608,3 +623,15 @@ app.delete("/itens_venda", async (req, res) => {
 })
 
 
+app.get("/quantidade", requireJWTAuth, async (req,res) => {
+    try {
+        const vendas = await db.any(
+            "select sum(c.qtd) from composicao c natural join venda v where v.status='Fechada';"
+        );
+        console.log(vendas);
+        res.json(vendas).status(200);
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(400);
+    }
+});
