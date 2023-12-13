@@ -63,6 +63,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
     }),
 );
 
+
 function Navbar(props) {
     const [open, setOpen] = React.useState(false);
     const toggleDrawer = () => {
@@ -181,7 +182,8 @@ function Navbar(props) {
 
                     <Divider />
                     <div variant="link" onClick={() => 
-                        navigate("/cadastro_vendas")}
+                            navigate("/cadastro_vendas")
+                    }
                     >
                         {cadastroVenda}
                     </div>

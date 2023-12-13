@@ -78,6 +78,53 @@ function Consulta(props) {
 		}
 	}
 
+    async function handleDelete() {
+        try {
+        if (!funcionario || isNaN(parseInt(funcionario))) {
+            setMessageText('CPF inválido. Por favor, insira um CPF válido.');
+            setMessageSeverity('warning');
+            setOpenMessage(true);
+            return;
+        }
+    
+        const token = localStorage.getItem('token');
+        await axios.delete('/funcionario', {
+            headers: {
+            Authorization: `bearer ${token}`,
+            },
+            data: {
+            CPFF: parseInt(funcionario),
+            },
+        });
+    
+        const cpfExists = await axios.get('/funcionario_id', {
+            headers: {
+            Authorization: `bearer ${token}`,
+            },
+            params: {
+            funcionario: parseInt(funcionario),
+            },
+        });
+            
+        if (cpfExists.data.length === 0) {
+            setMessageText('Funcionário deletado com sucesso!');
+            setMessageSeverity('success');
+            setOpenMessage(true);
+            getData();
+            clearForm();
+        } else {
+            setMessageText('Falha ao deletar funcionário!');
+            setMessageSeverity('error');
+            setOpenMessage(true);
+        }
+        } catch (error) {
+        console.error(error);
+        setMessageText('Falha ao deletar funcionário!');
+        setMessageSeverity('error');
+        setOpenMessage(true);
+        }
+    }
+
     async function handleSubmit() {
 		if (funcionario !== "") {
             try {
@@ -170,6 +217,23 @@ function Consulta(props) {
                                         color="primary"
                                         size={"large"}>
                                         Pesquisar
+                                    </Button>
+                                </Grid>
+
+                                <Grid item xs={3} mb={1}>
+                                    <Button
+                                        fullWidth
+                                        justifyContent={'left'}
+                                        variant="contained"
+                                        style={{
+                                            minWidth: "100px",
+                                            height: "40px"
+                                        }}
+                                        onClick={handleDelete}
+                                        type="submit"
+                                        color="primary"
+                                        size={"large"}>
+                                        Deletar
                                     </Button>
                                 </Grid>
 

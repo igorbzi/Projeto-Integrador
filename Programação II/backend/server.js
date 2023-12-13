@@ -152,6 +152,38 @@ app.get("/fornecedor", requireJWTAuth, async (req,res)=> {
     }
 });
 
+app.get("/fornecedor_id", requireJWTAuth, async (req, res) => {
+    try{
+        const cnpj = req.query.fornecedor;
+        console.log(cnpj);
+        const fornecedor = await db.any(
+            "select cnpj as id, nome, email from fornecedor where cnpj= $1;",
+            [cnpj]
+        );
+        res.json(fornecedor).status(200)
+    } catch (error){
+        console.log(error);
+        res.sendStatus(400);
+    }
+}
+);
+
+app.get("/fornecedor_email", requireJWTAuth, async (req, res) => {
+    try{
+        const email = req.query.fornecedor;
+        console.log(email);
+        const fornecedor = await db.any(
+            "select email from fornecedor where email= $1;",
+            [email]
+        );
+        res.json(fornecedor).status(200)
+    } catch (error){
+        console.log(error);
+        res.sendStatus(400);
+    }
+}
+);
+
 app.post("/fornecedor", requireJWTAuth, async (req, res) => {
     try {
 
@@ -175,6 +207,7 @@ app.post("/fornecedor", requireJWTAuth, async (req, res) => {
         res.sendStatus(400);
     }
 });
+
 
 app.put("/fornecedor", requireJWTAuth, (req, res) => {
     try{
@@ -231,6 +264,22 @@ app.get("/cliente_id", requireJWTAuth, async (req, res) => {
         const cliente = await db.any(
             "select cpfc as id, nome, email from cliente where cpfc= $1",
             [cpfc]
+        );
+        res.json(cliente).status(200)
+    } catch (error){
+        console.log(error);
+        res.sendStatus(400);
+    }
+}
+);
+
+app.get("/cliente_email", requireJWTAuth, async (req, res) => {
+    try{
+        const email = req.query.cliente;
+        console.log(email);
+        const cliente = await db.any(
+            "select email from cliente where email= $1;",
+            [email]
         );
         res.json(cliente).status(200)
     } catch (error){
@@ -302,6 +351,22 @@ app.get("/funcionario_id", requireJWTAuth, async (req, res) => {
 }
 );
 
+app.get("/funcionario_email", requireJWTAuth, async (req, res) => {
+    try{
+        const email = req.query.funcionario;
+        console.log(email);
+        const funcionario = await db.any(
+            "select email from funcionario where email= $1",
+            [email]
+        );
+        res.json(funcionario).status(200)
+    } catch (error){
+        console.log(error);
+        res.sendStatus(400);
+    }
+}
+);
+
 app.post("/funcionario", requireJWTAuth, async (req, res) => {
 	const saltRounds = 10;
 	try {
@@ -328,11 +393,31 @@ app.post("/funcionario", requireJWTAuth, async (req, res) => {
 	}
 });
 
+app.put("/funcionario", requireJWTAuth, async (req, res) => {
+    try{
+        const funcionarioCPFF = req.body.CPFF;
+        const funcionarioNome = req.body.nome;
+        const funcionarioEmail = req.body.email;   
+        const funcionarioSenha = req.body.passwd;              //pegando parametros da requisição para inserir no banco
+        const funcionarioTipo = req.body.type;
+
+        db.none(
+            "UPDATE funcionario SET nome = $1, email = $2, senha = $3, tipousu = $4 WHERE cpff = $5;",
+            [funcionarioNome, funcionarioEmail, funcionarioSenha, funcionarioTipo, funcionarioCPFF]
+        );
+        res.sendStatus(200);
+
+    } catch {
+        console.log(error);
+        res.sendStatus(400);
+    }
+    });
+
 app.delete("/funcionario", requireJWTAuth, async (req, res) => {
     try{
         const id = req.body.cpf; //pega parametro da req
         db.none(
-            "DELETE from funcionario where cpf = $1;", [id] //deleta pelo cnpj
+            "DELETE from funcionario where cpff = $1;", [id] //deleta pelo cnpj
         );
         res.sendStatus(200);
     } catch (error) {
@@ -394,7 +479,7 @@ app.delete("/tinta", requireJWTAuth, async (req, res) => {
     try{
         const id = req.body.COD; //pega parametro da req
         db.none(
-            "DELETE from tinta where cod = $1;", [id] //deleta pelo cnpj
+            "DELETE from tinta where cod = $1;", [id] //deleta pelo cod
         );
         res.sendStatus(200);
     } catch (error) {
@@ -505,5 +590,21 @@ app.post("/itens_venda", requireJWTAuth, async (req,res) => {
     }
 });
 
+app.delete("/itens_venda", async (req, res) => {
+    console.log(req.body)
+    try{
+        const ID = req.body.ID;
+        const cod = req.body.cod
+        console.log(`ID: ${ID} - Código: ${cod}`);
+
+        await db.none(
+            "DELETE from composicao where id=$1 and cod=$2; ", 
+            [ID, cod]
+        );
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(400);
+    }
+})
 
 

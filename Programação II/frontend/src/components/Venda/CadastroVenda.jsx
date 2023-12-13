@@ -48,9 +48,11 @@ function Venda(props) {
     const [ID, setID] = React.useState("");
 	const [vendedor, setVendedor] = React.useState("");
 	const [cliente, setCliente] = React.useState("");
+	const [cod, setCod] = React.useState("");
 	
 	const [listaTintas, setListaTinta] = React.useState([]);
 	const [lastItem, setLastItem] = React.useState(0);
+	const [flag, setFlag] = React.useState(false);
 
     const [Data, setData] = React.useState("");
 
@@ -72,9 +74,13 @@ function Venda(props) {
 		getID()
 	}, []);
 
+	React.useEffect(() =>
+		{getID()}, [flag]
+	)
+
 	React.useEffect(() => {
 		getItensVenda()
-	}, [lastItem])
+	}, [lastItem, ID])
 
 	async function getItensVenda() {
 		try {
@@ -103,7 +109,11 @@ function Venda(props) {
 					Authorization: `bearer ${token}`,
 				}
 			});
-			setID(parseInt(res.data[0].id) +1);
+			if(flag){
+				setID(parseInt(res.data[0].id));
+			} else {
+				setID(parseInt(res.data[0].id) +1);
+			}
 			console.log(res.data);
 		} catch (error) {
 			console.log(error);
@@ -111,16 +121,16 @@ function Venda(props) {
 	}
 
 	function clearForm() {
+		setFlag(false);
+		getID();
 		setVendedor("");
         setCliente("");
-		setListaTinta([]);
-		setLastItem(0);
 	}
 
 	async function handleSubmit() {
 		console.log(`ID ${ID} - CPFF: ${vendedor} - CPFC: ${cliente} - Data: ${Data}`);
 		if (ID !== "" && vendedor !== "" && cliente !== "" && Data !== "") {
-			if(listaTintas.length === 0){
+			if(lastItem === 0){
 				try {
 				const token = localStorage.getItem("token");
 				await axios.post("/venda", {
@@ -140,6 +150,7 @@ function Venda(props) {
 				setMessageText("Falha ao abrir venda!");
 				setMessageSeverity("error");
 				setOpenMessage(true);
+				setFlag(true);
 			}}
 		} else {
 			setMessageText("Dados de venda inválidos!");
@@ -163,38 +174,7 @@ function Venda(props) {
 				);
 				setMessageText("Venda fechada com sucesso!")
 				setMessageSeverity("success")
-				getID();
-				clearForm();
-			} catch (error) {
-				console.log(error);
-				setMessageText("Falha ao fechar venda!");
-				setMessageSeverity("error");
-			} finally {
-				setOpenMessage(true)
-			}
-		} else {
-			setMessageText("Não é possível fechar uma venda sem itens!");
-			setMessageSeverity("error");
-			setOpenMessage(true);
-		}
-	}
-
-	async function fechaVenda(){
-		if(listaTintas.length > 0){
-			try{
-				const token = localStorage.getItem("token");
-				await axios.put("/venda", {
-					ID: ID,
-					status: "Fechada"
-				}, {
-					headers: {
-						Authorization: `bearer ${token}`,
-					}
-				}
-				);
-				setMessageText("Venda fechada com sucesso!")
-				setMessageSeverity("success")
-				getID();
+				setLastItem(0);
 				clearForm();
 			} catch (error) {
 				console.log(error);
@@ -222,9 +202,9 @@ function Venda(props) {
 				}
 			}
 			);
-			setMessageText("Venda cancelada com sucesso!")
-			setMessageSeverity("success")
-			getID();
+			setMessageText("Venda cancelada com sucesso!");
+			setMessageSeverity("success");
+			setLastItem(0);
 			clearForm();
 		} catch (error) {
 			console.log(error);
@@ -258,6 +238,38 @@ function Venda(props) {
 				setMessageSeverity("error");
 				setOpenMessage(true)
 			}
+		}
+	}
+
+	async function excluirItem(){
+		if(listaTintas.length > 0){
+			try{
+				console.log(`Item Removido - ID: ${ID} - COD:${cod}`);
+				const token = localStorage.getItem("token");
+				await axios.delete("/itens_venda", {
+					headers: {
+						Authorization: `bearer ${token}`,
+					},
+					data: {
+						ID: ID,
+						cod: cod
+					}
+				}
+				);
+				setLastItem(lastItem+1);
+				setMessageText("Item excluído com sucesso!");
+				setMessageSeverity("success");
+				setOpenMessage(true);
+			} catch (error) {
+				console.log(error)
+				setMessageText("Não foi possível excluir o item!");
+				setMessageSeverity("error");
+				setOpenMessage(true);
+			}
+		} else {
+			setMessageText("Não há itens na venda!");
+			setMessageSeverity("error");
+			setOpenMessage(true)
 		}
 	}
 
@@ -436,8 +448,15 @@ function Venda(props) {
 										lista={listaTintas} 
 										colunas={colunas}
 										qtd={5}
-										selecao={false}
-										height={'380px'}/>
+										selecao={true}
+										height={'380px'}
+										setLinha={
+											(e) => {
+												console.log(e[0]);
+												setCod(e[0])
+											}
+										}
+										/>
 
 										<Grid item xs={4} spacing={2} mt={2}>
 											<Stack direction={'row'} spacing={2}>
@@ -448,8 +467,7 @@ function Venda(props) {
 														minWidth: "200px",
 														maxHeight: "40px"
 													}}
-													onClick={() =>
-													adicionarItem()}
+													onClick={adicionarItem}
 													type="submit"
 													color="primary"
 													height={'28px'}
@@ -464,8 +482,7 @@ function Venda(props) {
 														minWidth: "200px",
 														maxHeight: "40px"
 													}}
-													onClick={() =>
-														{}}
+													onClick={excluirItem}
 													type="submit"
 													color="primary"
 													height={'28px'}

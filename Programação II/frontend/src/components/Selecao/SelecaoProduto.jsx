@@ -149,7 +149,8 @@ function SelecaoProduto(props) {
             if(qtd > 0){
                 console.log(`ID: ${props.id} - Tinta: ${tinta[0]} - Quantidade: ${qtd}`)
                 const token = localStorage.getItem("token");
-                axios.post("/itens_venda",                 {
+                axios.post("/itens_venda",                
+                {
                     ID: props.id,
                     cod: tinta[0],
                     qtd: qtd
@@ -353,7 +354,7 @@ function SelecaoProduto(props) {
         </div>
                 <Snackbar
                     open={openMessage}
-                    autoHideDuration={6000}
+                    autoHideDuration={2000}
                     onClose={handleCloseMessage}
                     >
                     <Alert

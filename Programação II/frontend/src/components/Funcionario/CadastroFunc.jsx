@@ -1,6 +1,5 @@
 import React from "react";
 import axios from "axios";
-import { DataGrid } from "@mui/x-data-grid";
 import { blue } from "@mui/material/colors";
 import Titulo from "../Titulo"
 import Navbar from "../Navbar";
@@ -95,9 +94,35 @@ function CadastroFuncionario(props) {
 	async function handleSubmit() {
 		console.log(`CPF: ${CPFF} - Nome: ${nome} - Email: ${email} - Tipo: ${tipo}`);
 		if (CPFF !== "" && nome !== "" && email !== "" && senha !== "" && confirmacao !== "" && tipo !== "") {
-			if(senha===confirmacao){
-				try {
-					const token = localStorage.getItem("token");
+			try {
+				const token = localStorage.getItem("token");
+				const cpfExists = await axios.get(`/funcionario_id?funcionario=${CPFF}`, {
+					headers: {
+					Authorization: `bearer ${token}`,
+					},
+				});
+
+				// Verificar se o e-mail já existe no banco
+				const emailExists = await axios.get(`/funcionario_email?funcionario=${email}`, {
+					headers: {
+					Authorization: `bearer ${token}`,
+					},
+				});
+		
+				if (cpfExists.data.length > 0) {
+					setMessageText("CPF já cadastrado. Por favor, tente novamente.");
+					setMessageSeverity("warning");
+					setOpenMessage(true);
+					return;
+				}
+
+				if (emailExists.data.length > 0) {
+					setMessageText("Email já cadastrado. Por favor, tente novamente.");
+					setMessageSeverity("warning");
+					setOpenMessage(true);
+					return;
+				}
+				if(senha===confirmacao){
 					await axios.post("/funcionario", {
 						CPFF: CPFF,
 						nome: nome,
@@ -113,19 +138,19 @@ function CadastroFuncionario(props) {
 					setMessageText("Funcionário cadastrado com sucesso!");
 					setMessageSeverity("success");
 					clearForm(); // limpa o formulário apenas se cadastrado com sucesso
-				} catch (error) {
-					console.log(error);
-					setMessageText("Falha no cadastro do funcionário!");
-					setMessageSeverity("error");
-				} finally {
+				} else {
+					setMessageText("Confirmação de senha incorreta!");
+					setMessageSeverity("warning");
 					setOpenMessage(true);
-					await getData();
-				}
-			} else {
-				setMessageText("Confirmação de senha incorreta!");
-				setMessageSeverity("warning");
+					setConfirmacao("");
+				} 
+			} catch (error) {
+				console.log(error);
+				setMessageText("Falha no cadastro do funcionário!");
+				setMessageSeverity("error");
+			} finally {
 				setOpenMessage(true);
-				setConfirmacao("");
+				await getData();
 			}
 		} else {
 			setMessageText("Dados de funcionário inválidos!");

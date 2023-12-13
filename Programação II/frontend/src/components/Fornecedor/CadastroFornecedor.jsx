@@ -1,6 +1,5 @@
 import React from "react";
 import axios from "axios";
-import { DataGrid } from "@mui/x-data-grid";
 import { blue } from "@mui/material/colors";
 import Titulo from "../Titulo"
 import Navbar from "../Navbar";
@@ -94,6 +93,35 @@ function Fornecedor(props) {
 		if (CNPJ !== "" && nome !== "" && email !== "" && ender !== "" && telefone1 !== "") {
 			try {
 				const token = localStorage.getItem("token");
+
+				// Verificar se o CNPJ já existe
+				const cnpjExists = await axios.get(`/fornecedor_id?fornecedor=${CNPJ}`, {
+					headers: {
+						Authorization: `bearer ${token}`,
+					},
+				});
+	
+				if (cnpjExists.data.length > 0) {
+					setMessageText("CNPJ já cadastrado. Por favor, insira um CNPJ válido.");
+					setMessageSeverity("warning");
+					setOpenMessage(true);
+					return;
+				}
+	
+				// Verificar se o email já existe
+				const emailExists = await axios.get(`/fornecedor_email?fornecedor=${email}`, {
+					headers: {
+						Authorization: `bearer ${token}`,
+					},
+				});
+	
+				if (emailExists.data.length > 0) {
+					setMessageText("Email já cadastrado. Por favor, insira um email válido.");
+					setMessageSeverity("warning");
+					setOpenMessage(true);
+					return;
+				}
+				// Se o CPF e o email não existirem, proceder com o cadastro
 				await axios.post("/fornecedor", {
 					CNPJ: CNPJ,
 					nome: nome,

@@ -1,6 +1,5 @@
 import React from "react";
 import axios from "axios";
-import { DataGrid } from "@mui/x-data-grid";
 import { blue } from "@mui/material/colors";
 import Titulo from "../Titulo"
 import Navbar from "../Navbar";
@@ -93,9 +92,39 @@ function Cliente(props) {
 
 	async function handleSubmit() {
 		console.log(`CPF: ${CPFC} - Nome: ${nome} - Email: ${email} - Endereço: ${ender} - Telefone1: ${telefone1}`);
+		
 		if (CPFC !== "" && nome !== "" && email !== "" && ender !== "" && telefone1 !== "") {
 			try {
 				const token = localStorage.getItem("token");
+
+				// Verificar se o CPF já existe
+				const cpfExists = await axios.get(`/cliente_id?cliente=${CPFC}`, {
+					headers: {
+						Authorization: `bearer ${token}`,
+					},
+				});
+	
+				if (cpfExists.data.length > 0) {
+					setMessageText("CPF já cadastrado. Por favor, insira um CPF válido.");
+					setMessageSeverity("warning");
+					setOpenMessage(true);
+					return;
+				}
+
+				//Verificar se o email já existe
+				const emailExists = await axios.get(`/cliente_email?cliente=${email}`, {
+					headers: {
+						Authorization: `bearer ${token}`,
+					},
+				});
+	
+				if (emailExists.data.length > 0) {
+					setMessageText("Email já cadastrado. Por favor, insira um email válido.");
+					setMessageSeverity("warning");
+					setOpenMessage(true);
+					return;
+				}
+
 				await axios.post("/cliente", {
 					CPFC: CPFC,
 					nome: nome,

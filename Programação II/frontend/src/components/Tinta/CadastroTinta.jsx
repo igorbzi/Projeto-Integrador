@@ -94,22 +94,50 @@ function Tinta(props) {
 		console.log(`COD !== "" ${COD} - Nome: ${nome} - Base: ${base} - Litragem: ${litragem} - CNPJ: ${CNPJ}`);
 		if (COD !== "" && nome !== "" && base !== "" && litragem !== "" && CNPJ !== "") {
 			try {
+				//Verifica se o COD já existe no banco
 				const token = localStorage.getItem("token");
-				await axios.post("/tinta", {
-                    COD: COD,
-					nome: nome,
-                    base: base,
-                    litragem: litragem,
-                    CNPJ: CNPJ
-				}, {
+
+				const codExists = await axios.get(`/tinta_id?tinta=${COD}`, {
+					headers: {
+					Authorization: `bearer ${token}`,
+					},
+				});
+				const cnpjExists = await axios.get(`/fornecedor_id?fornecedor=${CNPJ}`, {
 					headers: {
 						Authorization: `bearer ${token}`,
-					}
+					},
+				});
+	
+				if(codExists.data.length > 0){
+					setMessageText("Código já cadastrado. Por favor, tente novamente.");
+					setMessageSeverity("warning");
+					setOpenMessage(true);
+					return;
 				}
-				);
-				setMessageText("Tinta cadastrada com sucesso!");
-				setMessageSeverity("success");
-				clearForm(); // limpa o formulário apenas se cadastrado com sucesso
+
+				if (cnpjExists.data.length === 0) {
+					setMessageText("CNPJ não encontrado. Por favor, insira um CNPJ válido.");
+					setMessageSeverity("warning");
+					setOpenMessage(true);
+					return;
+				} else {
+					await axios.post("/tinta", {
+						COD: COD,
+						nome: nome,
+						base: base,
+						litragem: litragem,
+						CNPJ: CNPJ
+					}, {
+						headers: {
+							Authorization: `bearer ${token}`,
+						}
+					}
+					);
+					setMessageText("Tinta cadastrada com sucesso!");
+					setMessageSeverity("success");
+					clearForm();
+				}
+ // limpa o formulário apenas se cadastrado com sucesso
 			} catch (error) {
 				console.log(error);
 				setMessageText("Falha no cadastro da tinta!");
