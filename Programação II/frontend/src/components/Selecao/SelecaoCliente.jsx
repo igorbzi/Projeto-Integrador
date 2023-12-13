@@ -39,10 +39,10 @@ const selecao_style = {
 	backgroundColor: '#fff'
 }
 
-function SelecaoFunc(props) {
+function SelecaoCliente(props) {
 
-    const [funcionario, setFuncionario] = React.useState("");
-	const [listaFuncionario, setListaFuncionario] = React.useState([]);
+    const [cliente, setCliente] = React.useState("");
+	const [listaCliente, setListaCliente] = React.useState([]);
     
     const [openMessage, setOpenMessage] = React.useState(false);
 	const [messageText, setMessageText] = React.useState("");
@@ -53,18 +53,18 @@ function SelecaoFunc(props) {
 	}, []);
 
     function clearForm() {
-        setFuncionario("");
+        setCliente("");
     }
 
     async function getDataId() {
 		try {
 			const token = localStorage.getItem("token");
-			const res = await axios.get("/funcionario_id", {
+			const res = await axios.get("/cliente_id", {
                 headers: {
                     Authorization: `bearer ${token}`,
                 },
                 params: {
-                    funcionario: parseInt(funcionario)
+                    cliente: parseInt(cliente)
                 }
             });
             if(res.data.length === 0){
@@ -72,33 +72,33 @@ function SelecaoFunc(props) {
                 setMessageSeverity("error");
                 setOpenMessage(true);
             } else {
-                setFuncionario(res.data[0].nome);
-                console.log(funcionario);
-                setListaFuncionario(res.data);
+                setCliente(res.data[0].nome);
+                console.log(cliente);
+                setListaCliente(res.data);
                 console.log(res.data);
             }
 		} catch (error) {
-			setListaFuncionario([]);
+			setListaCliente([]);
 		}
 	}
 
     async function getData() {
 		try {
 			const token = localStorage.getItem("token");
-            const res = await axios.get("/funcionario", {
+            const res = await axios.get("/cliente", {
                     headers: {
                         Authorization: `bearer ${token}`,
                     },
                 });
-			setListaFuncionario(res.data);
+			setListaCliente(res.data);
 			console.log(res.data);
 		} catch (error) {
-			setListaFuncionario([]);
+			setListaCliente([]);
 		}
 	}
 
     async function handleSubmit() {
-		if (funcionario !== "") {
+		if (cliente !== "") {
             try {
                 await getDataId();
                 clearForm();
@@ -123,10 +123,10 @@ function SelecaoFunc(props) {
 		}
 	}
 
-    function setVendedor() {
-        props.setVendedor(funcionario)
+    function setComprador() {
+        props.setComprador(cliente)
         clearForm("");
-        props.setOpenSelecaoFunc(false)
+        props.setOpenSelecaoCliente(false)
     }
 
     if (props.isOpen){
@@ -141,30 +141,30 @@ function SelecaoFunc(props) {
                     justifyContent={'space-between'}
                     direction={'row'}>
 
-                        <Titulo mensagem={"Selecione o vendedor "} fontSize={"28px"} />
+                        <Titulo mensagem={"Selecione o cliente "} fontSize={"28px"} />
 
                         <IconButton>
-                            <CloseIcon onClick={props.setOpenSelecaoFunc} />
+                            <CloseIcon onClick={props.setOpenSelecaoCliente} />
                         </IconButton>
                     </Stack>
                 </Grid>
 
                 <Tabela
-                    lista={listaFuncionario} 
+                    lista={listaCliente} 
                     colunas={colunas}
                     qtd={5}
                     selecao={true}
                     heght={'380px'}
-                    setLinha={setFuncionario}/>
+                    setLinha={setCliente}/>
 
                 <Grid item xs={9.5}>
 
                     <OutlinedInput
                     fullWidth
-                    id="funcionario-input"
+                    id="cliente-input"
                     size="small"
-                    onChange={(e) => setFuncionario(e.target.value)}
-                    value={funcionario}
+                    onChange={(e) => setCliente(e.target.value)}
+                    value={cliente}
                     />
 
                 </Grid>
@@ -188,13 +188,13 @@ function SelecaoFunc(props) {
                         fullWidth
                         justifyContent={'right'}
                         variant="contained"
-                        onClick={setVendedor}
+                        onClick={setComprador}
                         type="submit"
                         color="primary"
                         size={"small"}
                         height={'28px'}
                         >
-                        Selecionar Vendedor
+                        Selecionar o Comprador
                         </Button>
                 </Grid>
 
@@ -207,4 +207,4 @@ function SelecaoFunc(props) {
     return null;
 }
 
-export default SelecaoFunc
+export default SelecaoCliente

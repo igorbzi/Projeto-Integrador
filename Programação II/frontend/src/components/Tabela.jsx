@@ -14,7 +14,10 @@ function Tabela(props) {
                 rows={props.lista}
                 columns={props.colunas}
                 getRowId={(row) => row.id}
-                pageSizeOptions={props.qtd}
+                pageSizeOptions={{
+                    pagesizeoption: props.qtd
+                }}
+                
                 initialState={{
                     pagination:{
                         paginationModel : {
@@ -22,7 +25,13 @@ function Tabela(props) {
                         },
                     },
                 }}
-                disableRowSelectionOnClick={props.selecao}
+
+                disableRowSelectionOnClick={!props.selecao}
+
+                disableMultipleRowSelection={true}
+
+                onRowSelectionModelChange={(linha) => { props.setLinha(linha)}
+                }   
             />
         </Grid>
     )

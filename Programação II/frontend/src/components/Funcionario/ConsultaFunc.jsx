@@ -1,7 +1,6 @@
 import React from 'react'
 import Navbar from '../Navbar';
 import axios from "axios";
-import { DataGrid } from "@mui/x-data-grid";
 import Titulo from "../Titulo"
 
 import {

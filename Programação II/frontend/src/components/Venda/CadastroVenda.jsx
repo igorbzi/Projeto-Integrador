@@ -4,6 +4,9 @@ import { blue } from "@mui/material/colors";
 import Titulo from "../Titulo"
 import Navbar from "../Navbar";
 //import { IMaskInput } from "react-imask";
+import SelecaoFunc from "../Selecao/SelecaoFunc";
+import SelecaoCliente from "../Selecao/SelecaoCliente";
+import SelecaoProduto from "../Selecao/SelecaoProduto";
 
 import { 
 		Alert, 
@@ -19,7 +22,8 @@ import {
 		Paper, 
 		Toolbar, 
 		} from "@mui/material";
-import SelecaoFunc from "../Selecao/SelecaoFunc";
+
+
 import Tabela from "../Tabela";
 
 
@@ -28,7 +32,7 @@ const colunas = [
 	{ field: "nome", headerName: "Produto", width: 300 },
 	{ field: "base", headerName: "Base", width: 80 },
 	{ field: "litragem", headerName: "Litragem", width: 80 },
-	{ field: "quantidade", headerName: "Quantidade", width: 100 }
+	{ field: "qtd", headerName: "Quantidade", width: 100 }
 ];
 
 const defaultTheme = createTheme({
@@ -42,18 +46,21 @@ const defaultTheme = createTheme({
 function Venda(props) {
 
     const [ID, setID] = React.useState("");
-    const [CPFF, setCPFF] = React.useState("");
-    const [CPFC, setCPFC] = React.useState("");
+	const [vendedor, setVendedor] = React.useState("");
+	const [cliente, setCliente] = React.useState("");
+	
+	const [listaTintas, setListaTinta] = React.useState([]);
+	const [lastItem, setLastItem] = React.useState(0);
+
     const [Data, setData] = React.useState("");
+
 	const [openMessage, setOpenMessage] = React.useState(false);
 	const [messageText, setMessageText] = React.useState("");
 	const [messageSeverity, setMessageSeverity] = React.useState("success");
-	const [listaVenda, setListaVenda] = React.useState([]);
 	const [openSelecaoFunc, setOpenSelecaoFunc] = React.useState(false);
+	const [openSelecaoCliente, setOpenSelecaoCliente] = React.useState(false);
+	const [openSelecaoTinta, setOpenSelecaoTinta] = React.useState(false);
 
-	React.useEffect(() => {
-		getData();
-	}, []);
 
 	React.useEffect(() => {
 		const hoje = new Date();
@@ -62,26 +69,31 @@ function Venda(props) {
 		const ano = hoje.getFullYear()
 		const dataAtual = `${dia}/${mes}/${ano}`
 		setData(dataAtual)
-	}, [])
+		getID()
+	}, []);
 
 	React.useEffect(() => {
-		getID();
-	}, [])
+		getItensVenda()
+	}, [lastItem])
 
-	async function getData() {
+	async function getItensVenda() {
 		try {
 			const token = localStorage.getItem("token");
-			const res = await axios.get("/venda", {
+			const res = await axios.get("/itens_venda", {
 				headers: {
 					Authorization: `bearer ${token}`,
 				},
+				params: {
+					id: ID
+				}
 			});
-			setListaVenda(res.data);
+			setListaTinta(res.data)
 			console.log(res.data);
 		} catch (error) {
-			setListaVenda([]);
+			console.log(error);
 		}
 	}
+
 
 	async function getID() {
 		try {
@@ -99,46 +111,127 @@ function Venda(props) {
 	}
 
 	function clearForm() {
-        setID("");
-		setCPFF("");
-        setCPFC("");
-        setData("");
-	}
-
-	function handleCancelClick() {
-		if (ID !== "" || CPFF !== "" || CPFC !== "" || Data !== "") {
-			setMessageText("Cadastro de venda cancelado!");
-			setMessageSeverity("warning");
-			setOpenMessage(true);
-		}
-		clearForm();
+		setVendedor("");
+        setCliente("");
+		setListaTinta([]);
+		setLastItem(0);
 	}
 
 	async function handleSubmit() {
-		console.log(`ID !== "" ${ID} - CPFF: ${CPFF} - CPFC: ${CPFC} - Data: ${Data}`);
-		if (ID !== "" && CPFF !== "" && CPFC !== "" && Data !== "") {
-			try {
+		console.log(`ID ${ID} - CPFF: ${vendedor} - CPFC: ${cliente} - Data: ${Data}`);
+		if (ID !== "" && vendedor !== "" && cliente !== "" && Data !== "") {
+			if(listaTintas.length === 0){
+				try {
+				const token = localStorage.getItem("token");
 				await axios.post("/venda", {
-                    ID: ID,
-					CPFF: CPFF,
-                    CPFC: CPFC,
-                    Data: Data
-				});
-				setMessageText("Venda cadastrada com sucesso!");
-				setMessageSeverity("success");
-				clearForm(); // limpa o formulário apenas se cadastrado com sucesso
+					ID: ID,
+					CPFF: parseInt(vendedor),
+                    CPFC: parseInt(cliente),
+                    data: Data,
+					status: "Aberta"
+				}, {
+				headers: {
+					Authorization: `bearer ${token}`,
+				}
+				}
+			);
 			} catch (error) {
 				console.log(error);
-				setMessageText("Falha no cadastro da venda!");
+				setMessageText("Falha ao abrir venda!");
 				setMessageSeverity("error");
-			} finally {
 				setOpenMessage(true);
-				await getData();
-			}
+			}}
 		} else {
 			setMessageText("Dados de venda inválidos!");
 			setMessageSeverity("warning");
 			setOpenMessage(true);
+		}
+	}
+
+	async function fechaVenda(){
+		if(listaTintas.length > 0){
+			try{
+				const token = localStorage.getItem("token");
+				await axios.put("/venda", {
+					ID: ID,
+					status: "Fechada"
+				}, {
+					headers: {
+						Authorization: `bearer ${token}`,
+					}
+				}
+				);
+				setMessageText("Venda fechada com sucesso!")
+				setMessageSeverity("success")
+				getID();
+				clearForm();
+			} catch (error) {
+				console.log(error);
+				setMessageText("Falha ao fechar venda!");
+				setMessageSeverity("error");
+			} finally {
+				setOpenMessage(true)
+			}
+		} else {
+			setMessageText("Não é possível fechar uma venda sem itens!");
+			setMessageSeverity("error");
+			setOpenMessage(true);
+		}
+	}
+
+	async function fechaVenda(){
+		if(listaTintas.length > 0){
+			try{
+				const token = localStorage.getItem("token");
+				await axios.put("/venda", {
+					ID: ID,
+					status: "Fechada"
+				}, {
+					headers: {
+						Authorization: `bearer ${token}`,
+					}
+				}
+				);
+				setMessageText("Venda fechada com sucesso!")
+				setMessageSeverity("success")
+				getID();
+				clearForm();
+			} catch (error) {
+				console.log(error);
+				setMessageText("Falha ao fechar venda!");
+				setMessageSeverity("error");
+			} finally {
+				setOpenMessage(true)
+			}
+		} else {
+			setMessageText("Não é possível fechar uma venda sem itens!");
+			setMessageSeverity("error");
+			setOpenMessage(true);
+		}
+	}
+
+	async function cancelaVenda(){
+		try{
+			const token = localStorage.getItem("token");
+			await axios.put("/venda", {
+				ID: ID,
+				status: "Cancelada"
+			}, {
+				headers: {
+					Authorization: `bearer ${token}`,
+				}
+			}
+			);
+			setMessageText("Venda cancelada com sucesso!")
+			setMessageSeverity("success")
+			getID();
+			clearForm();
+		} catch (error) {
+			console.log(error);
+			setMessageText("Falha ao cancelar venda!");
+			setMessageSeverity("error");
+		} finally {
+			setOpenMessage(true)
 		}
 	}
 
@@ -149,13 +242,56 @@ function Venda(props) {
 		setOpenMessage(false);
 	}
 
+	function adicionarItem(){
+		if(vendedor !== "" && cliente !== ""){
+			if(listaTintas.length === 0){
+				handleSubmit()
+			}
+			setOpenSelecaoTinta(true);
+		} else {
+			if(vendedor === ""){
+				setMessageText("Insira o funcionário!");
+				setMessageSeverity("error");
+				setOpenMessage(true)
+			} else if(cliente === "") {
+				setMessageText("Insira o cliente!");
+				setMessageSeverity("error");
+				setOpenMessage(true)
+			}
+		}
+	}
 
 	return (
 
 		<ThemeProvider theme={defaultTheme}>
 			<CssBaseline />	
 				
-				<SelecaoFunc isOpen={openSelecaoFunc}/>
+				<SelecaoFunc 
+					isOpen={openSelecaoFunc} 
+					setOpenSelecaoFunc={() => setOpenSelecaoFunc(!openSelecaoFunc)} 
+					setVendedor={
+						(e) => {
+							console.log(e[0]);
+							setVendedor(e[0])
+						}}
+					/>
+
+				<SelecaoCliente 
+					isOpen={openSelecaoCliente}
+					setOpenSelecaoCliente={() => setOpenSelecaoCliente(!openSelecaoCliente)}
+					setComprador={
+						(e) => {
+							console.log(e[0])
+							setCliente(e[0])
+						}}
+					/>
+
+				<SelecaoProduto
+					isOpen={openSelecaoTinta} 
+					setOpenSelecaoTinta={() => setOpenSelecaoTinta(!openSelecaoTinta)} 
+					id={ID}
+					setLastItem={() => {setLastItem(lastItem+1)}}
+					/>
 
 				<Box sx={{ display: 'flex' }}>
 
@@ -201,7 +337,6 @@ function Venda(props) {
 												fullWidth
 												id="id-input"
 												size="small"
-												onChange={(e) => setID(e.target.value)}
 												value={ID}
 												inputProps={{
 													readOnly: true,
@@ -217,7 +352,6 @@ function Venda(props) {
 												variant="outlined"
 												id="data-input"
 												size="small"
-												onChange={(e) => setData(e.target.value)}
 												value={Data}
 												inputProps={{
 													readOnly: true,
@@ -234,8 +368,7 @@ function Venda(props) {
 												variant="outlined"
 												id="cpff-input"
 												size="small"
-												onChange={(e) => setCPFF(e.target.value)}
-												value={CPFF}
+												value={vendedor}
 												inputProps={{
 													readOnly: true,
 												}}
@@ -251,7 +384,8 @@ function Venda(props) {
 													minWidth: "120px",
 													maxHeight: "40px"
 												}}
-												//onClick={}
+												onClick={() =>
+													{setOpenSelecaoFunc(true)}}
 												type="submit"
 												color="primary"
 												height={'28px'}
@@ -267,8 +401,7 @@ function Venda(props) {
 												fullWidth
 												id="cpfc-input"
 												size="small"
-												onChange={(e) => setCPFC(e.target.value)}
-												value={CPFC}
+												value={cliente}
 												inputProps={{
 													readOnly: true,
 												}}
@@ -284,7 +417,9 @@ function Venda(props) {
 													minWidth: "120px",
 													maxHeight: "40px"
 												}}
-												//onClick={}
+												onClick={() => {
+													setOpenSelecaoCliente(true)
+												}}
 												type="submit"
 												color="primary"
 												height={'28px'}
@@ -298,46 +433,46 @@ function Venda(props) {
 										</Grid>
 
 										<Tabela
-										lista={listaVenda} 
+										lista={listaTintas} 
 										colunas={colunas}
 										qtd={5}
 										selecao={false}
 										height={'380px'}/>
 
-										<Grid item xs={2} spacing={2} mt={2}>
-											<Button
-												variant="contained"
-												style={{
-													maxWidth: "200px",
-													minWidth: "200px",
-													maxHeight: "40px"
-												}}
-												onClick={() =>
-												{setOpenSelecaoFunc(true)}}
-												type="submit"
-												color="primary"
-												height={'28px'}
-												size={"large"}>
-												Selecionar Itens
-											</Button>
-										</Grid>
+										<Grid item xs={4} spacing={2} mt={2}>
+											<Stack direction={'row'} spacing={2}>
+												<Button
+													variant="contained"
+													style={{
+														maxWidth: "200px",
+														minWidth: "200px",
+														maxHeight: "40px"
+													}}
+													onClick={() =>
+													adicionarItem()}
+													type="submit"
+													color="primary"
+													height={'28px'}
+													size={"large"}>
+													Selecionar Itens
+												</Button>
 
-										<Grid item xs={2} spacing={2} mt={2}>
-											<Button
-												variant="contained"
-												style={{
-													maxWidth: "200px",
-													minWidth: "200px",
-													maxHeight: "40px"
-												}}
-												onClick={() =>
-													{}}
-												type="submit"
-												color="primary"
-												height={'28px'}
-												size={"large"}>
-												Excluir Item
-											</Button>
+												<Button
+													variant="contained"
+													style={{
+														maxWidth: "200px",
+														minWidth: "200px",
+														maxHeight: "40px"
+													}}
+													onClick={() =>
+														{}}
+													type="submit"
+													color="primary"
+													height={'28px'}
+													size={"large"}>
+													Excluir Item
+												</Button>
+											</Stack>
 										</Grid>
 
 										<Grid item xs={7} mt={1.8} mb={2}>
@@ -354,7 +489,7 @@ function Venda(props) {
 															minWidth: "100px",
 															maxHeight: "40px"
 														}}
-														onClick={handleSubmit}
+														onClick={fechaVenda}
 														type="submit"
 														color="success"
 														height={'28px'}
@@ -368,7 +503,7 @@ function Venda(props) {
 															maxWidth: "100px",
 															minWidth: "100px",
 														}}
-														onClick={handleCancelClick}
+														onClick={cancelaVenda}
 														color="error"
 													>
 														Cancelar

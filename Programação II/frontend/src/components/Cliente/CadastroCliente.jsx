@@ -95,6 +95,7 @@ function Cliente(props) {
 		console.log(`CPF: ${CPFC} - Nome: ${nome} - Email: ${email} - Endereço: ${ender} - Telefone1: ${telefone1}`);
 		if (CPFC !== "" && nome !== "" && email !== "" && ender !== "" && telefone1 !== "") {
 			try {
+				const token = localStorage.getItem("token");
 				await axios.post("/cliente", {
 					CPFC: CPFC,
 					nome: nome,
@@ -102,6 +103,10 @@ function Cliente(props) {
 					ender: ender,
 					telefone1: telefone1,
 					telefone2: telefone2
+				}, {	
+					headers: {
+						Authorization: `bearer ${token}`,
+					}
 				});
 				setMessageText("Cliente cadastrado com sucesso!");
 				setMessageSeverity("success");

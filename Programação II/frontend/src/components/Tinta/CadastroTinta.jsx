@@ -94,13 +94,19 @@ function Tinta(props) {
 		console.log(`COD !== "" ${COD} - Nome: ${nome} - Base: ${base} - Litragem: ${litragem} - CNPJ: ${CNPJ}`);
 		if (COD !== "" && nome !== "" && base !== "" && litragem !== "" && CNPJ !== "") {
 			try {
+				const token = localStorage.getItem("token");
 				await axios.post("/tinta", {
                     COD: COD,
 					nome: nome,
                     base: base,
                     litragem: litragem,
                     CNPJ: CNPJ
-				});
+				}, {
+					headers: {
+						Authorization: `bearer ${token}`,
+					}
+				}
+				);
 				setMessageText("Tinta cadastrada com sucesso!");
 				setMessageSeverity("success");
 				clearForm(); // limpa o formulário apenas se cadastrado com sucesso

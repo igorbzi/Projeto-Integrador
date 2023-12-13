@@ -93,6 +93,7 @@ function Fornecedor(props) {
 		console.log(`CNPJ: ${CNPJ} - Nome: ${nome} - Email: ${email} - Endereço: ${ender} - Telefone1: ${telefone1}`);
 		if (CNPJ !== "" && nome !== "" && email !== "" && ender !== "" && telefone1 !== "") {
 			try {
+				const token = localStorage.getItem("token");
 				await axios.post("/fornecedor", {
 					CNPJ: CNPJ,
 					nome: nome,
@@ -100,7 +101,12 @@ function Fornecedor(props) {
 					ender: ender,
 					telefone1: telefone1,
 					telefone2: telefone2
-				});
+				}, {
+					headers: {
+						Authorization: `bearer ${token}`,
+					}
+				}
+				);
 				setMessageText("Fornecedor cadastrado com sucesso!");
 				setMessageSeverity("success");
 				clearForm(); // limpa o formulário apenas se cadastrado com sucesso

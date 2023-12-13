@@ -152,7 +152,7 @@ app.get("/fornecedor", requireJWTAuth, async (req,res)=> {
     }
 });
 
-app.post("/fornecedor", async (req, res) => {
+app.post("/fornecedor", requireJWTAuth, async (req, res) => {
     try {
 
         const fornecedorCNPJ = req.body.CNPJ;
@@ -176,7 +176,7 @@ app.post("/fornecedor", async (req, res) => {
     }
 });
 
-app.put("/fornecedor", (req, res) => {
+app.put("/fornecedor", requireJWTAuth, (req, res) => {
     try{
         const id = req.body.CNPJ
         const fornecedorNome = req.body.nome;
@@ -197,7 +197,7 @@ app.put("/fornecedor", (req, res) => {
     }
     });
 
-app.delete("/fornecedor", async (req, res) => {
+app.delete("/fornecedor", requireJWTAuth, async (req, res) => {
     try{
         const id = req.body.cnpj; //pega parametro da req
         db.none(
@@ -225,7 +225,22 @@ app.get("/cliente", requireJWTAuth, async (req,res)=> {
     }
 });
 
-app.post("/cliente", async (req, res) => {
+app.get("/cliente_id", requireJWTAuth, async (req, res) => {
+    try{
+        const cpfc = req.query.cliente;
+        const cliente = await db.any(
+            "select cpfc as id, nome, email from cliente where cpfc= $1",
+            [cpfc]
+        );
+        res.json(cliente).status(200)
+    } catch (error){
+        console.log(error);
+        res.sendStatus(400);
+    }
+}
+);
+
+app.post("/cliente", requireJWTAuth, async (req, res) => {
     try {
         const clienteCPFC = req.body.CPFC;
         const clienteNome = req.body.nome;
@@ -234,7 +249,6 @@ app.post("/cliente", async (req, res) => {
         const clienteTelefone1 = req.body.telefone1;
         const clienteTelefone2 = req.body.telefone2;
         
-        console.log(`cpf: ${clienteCPFC} Nome: ${clienteNome}`);
         db.none(
             "INSERT INTO cliente (cpfc, nome, email, ender, telefone1, telefone2) VALUES ($1, $2, $3, $4, $5, $6);", //passando parâmetros
             [clienteCPFC, clienteNome, clienteEmail, clienteEndereco, clienteTelefone1, clienteTelefone2]
@@ -246,7 +260,7 @@ app.post("/cliente", async (req, res) => {
     }
 });
 
-app.delete("/cliente", async (req, res) => {
+app.delete("/cliente", requireJWTAuth, async (req, res) => {
     try{
         const id = req.body.cpf; //pega parametro da req
         db.none(
@@ -273,10 +287,9 @@ app.get("/funcionario", requireJWTAuth, async (req,res)=> {
     }
 });
 
-app.get("/funcionario_id", /*requireJWTAuth*/ async (req, res) => {
+app.get("/funcionario_id", requireJWTAuth, async (req, res) => {
     try{
         const cpff = req.query.funcionario;
-        console.log(cpff);
         const funcionario = await db.any(
             "select cpff as id, nome, email from funcionario where cpff= $1",
             [cpff]
@@ -289,7 +302,7 @@ app.get("/funcionario_id", /*requireJWTAuth*/ async (req, res) => {
 }
 );
 
-app.post("/funcionario", async (req, res) => {
+app.post("/funcionario", requireJWTAuth, async (req, res) => {
 	const saltRounds = 10;
 	try {
 		const userCPF = req.body.CPFF;
@@ -315,7 +328,7 @@ app.post("/funcionario", async (req, res) => {
 	}
 });
 
-app.delete("/funcionario", async (req, res) => {
+app.delete("/funcionario", requireJWTAuth, async (req, res) => {
     try{
         const id = req.body.cpf; //pega parametro da req
         db.none(
@@ -343,7 +356,21 @@ app.get("/tinta", requireJWTAuth, async (req,res)=> {
     }
 });
 
-app.post("/tinta", async (req, res) => {
+app.get("/tinta_id", requireJWTAuth, async (req,res)=> {
+    try{
+        const cod = req.query.tinta;
+        const tinta = await db.any(
+            "select cod as id, nome, base, litragem from tinta where cod= $1",
+            [cod]
+        );
+        res.json(tinta).status(200)
+    } catch (error){
+        console.log(error);
+        res.sendStatus(400);
+    }
+});
+
+app.post("/tinta", requireJWTAuth, async (req, res) => {
     try {
         const tintaCod = req.body.COD;
         const tintaNome = req.body.nome;
@@ -363,7 +390,7 @@ app.post("/tinta", async (req, res) => {
     }
 });
 
-app.delete("/tinta", async (req, res) => {
+app.delete("/tinta", requireJWTAuth, async (req, res) => {
     try{
         const id = req.body.COD; //pega parametro da req
         db.none(
@@ -403,18 +430,19 @@ app.get("/venda", requireJWTAuth, async (req,res)=> {
     }
 });
 
-app.post("/venda", async (req, res) => {
+app.post("/venda", requireJWTAuth, async (req, res) => {
     try {
         const vendaID = req.body.ID;
         const vendaCPFF = req.body.CPFF;
         const vendaCPFC = req.body.CPFC;
-        const vendaData = req.body.Data;
+        const vendaData = req.body.data;
+        const vendaStatus = req.body.status;
 
         console.log(`ID: ${vendaID} CPFF: ${vendaCPFF} CPFC: ${vendaCPFC} Data: ${vendaData}`);
         
         await db.none(
-            "INSERT INTO venda (cpff, cpfc, data) VALUES ($1, $2, $3);",
-            [vendaID, vendaCPFF, vendaCPFC, vendaData]
+            "INSERT INTO venda (cpff, cpfc, data, status) VALUES ($1, $2, $3, $4);",
+            [vendaCPFF, vendaCPFC, vendaData, vendaStatus]
         );
 
         res.sendStatus(200);
@@ -423,3 +451,59 @@ app.post("/venda", async (req, res) => {
         res.sendStatus(400);
     }
 });
+
+app.put("/venda", requireJWTAuth, (req, res) => {
+    try{
+        const ID = req.body.ID
+        const status = req.body.status;
+        console.log(`ID: ${ID} - Status: ${status}`);
+        db.none(
+            "UPDATE venda SET status=$2 WHERE id = $1",
+            [ID, status]
+        );
+        res.sendStatus(200);
+
+    } catch {
+        console.log(error);
+        res.sendStatus(400);
+    }
+    });
+
+app.get("/itens_venda", requireJWTAuth, async (req,res) => {
+    try {
+        const id = req.query.id;
+        console.log(`ID da Venda: ${id}`);
+        const vendas = await db.any(
+            "select t.cod as id, t.nome, t.base, t.litragem, c.qtd from tinta t join composicao c on t.cod=c.cod natural join venda v where v.id= $1;",
+            [id]
+        );
+
+        res.json(vendas).status(200);
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(400);
+    }
+});
+
+app.post("/itens_venda", requireJWTAuth, async (req,res) => {
+    try {
+        const ID = req.body.ID;
+        const cod = req.body.cod;
+        const qtd = req.body.qtd;
+
+        console.log(`ID: ${ID} Código: ${cod} Quantidade: ${qtd}`);
+        
+        await db.none(
+            "INSERT INTO composicao (id, cod, qtd) VALUES ($1, $2, $3);",
+            [ID, cod, qtd]
+        );
+
+        res.sendStatus(200);
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(400);
+    }
+});
+
+
+

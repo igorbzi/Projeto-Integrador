@@ -97,13 +97,19 @@ function CadastroFuncionario(props) {
 		if (CPFF !== "" && nome !== "" && email !== "" && senha !== "" && confirmacao !== "" && tipo !== "") {
 			if(senha===confirmacao){
 				try {
+					const token = localStorage.getItem("token");
 					await axios.post("/funcionario", {
 						CPFF: CPFF,
 						nome: nome,
 						email: email,
 						passwd: senha,
 						type: tipo
-					});
+					},{
+					headers: {
+						Authorization: `bearer ${token}`,
+					}
+					}
+					);
 					setMessageText("Funcionário cadastrado com sucesso!");
 					setMessageSeverity("success");
 					clearForm(); // limpa o formulário apenas se cadastrado com sucesso
