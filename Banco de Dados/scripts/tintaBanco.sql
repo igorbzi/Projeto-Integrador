@@ -10,8 +10,6 @@ CREATE TABLE Funcionario (
 	constraint pk_funcionario primary key (CPFF)
 );
 
-INSERT INTO Funcionario(CPFF, Nome, Email, Senha, TipoUsu) VALUES (12345678, 'admin', 'admin@gmail.com', '$2b$10$osKuv05HQ/ePspiVwYS7W.ugvBzF4CEqndHFB6QHmql7qYO/gQ', 1);
-
 CREATE TABLE Cliente (
 	CPFC BIGINT NOT NULL,
 	Nome VARCHAR(50) NOT NULL,
